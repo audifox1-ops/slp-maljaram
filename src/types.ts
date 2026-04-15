@@ -46,3 +46,20 @@ export interface MonthlyJournalData {
   }[];
   result: string;
 }
+
+export interface RawRecord {
+  '학생이름': string;
+  '거래일자': string;
+  '금액'?: string | number;
+  '지원영역'?: string;
+  '소속 학교'?: string;
+  '생년월일'?: string;
+  '장애유형'?: string;
+  '치료사명'?: string;
+  [key: string]: any;
+}
+
+export interface UploadStatus {
+  type: 'success' | 'error';
+  message: string;
+}
