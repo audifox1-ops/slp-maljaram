@@ -17,7 +17,7 @@ const firebaseConfig = {
   messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "420938473723",
   appId: import.meta.env.VITE_FIREBASE_APP_ID || "1:420938473723:web:41a59d5b4fa8e77696505e",
   measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID || "",
-  firestoreDatabaseId: isInvalidDbId(ENV_DATABASE_ID) ? "(default)" : ENV_DATABASE_ID,
+  firestoreDatabaseId: "ai-studio-f6c3d59c-c8ab-4ba0-973b-32245977679a",
 };
 
 console.log('[FIREBASE_DEBUG] Initializing with:', {
