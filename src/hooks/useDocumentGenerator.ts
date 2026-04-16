@@ -19,6 +19,7 @@ interface UseDocumentGeneratorReturn {
   isLoading: boolean;
   fetchData: (student: Student) => Promise<void>;
   generateDraft: (student: Student) => Promise<void>;
+  generateBatchInRange: (student: Student, startMonth: number, endMonth: number, progressCallback?: (month: number) => void) => Promise<void>;
   saveAnnualData: (student: Student, data: AnnualPlanData) => Promise<void>;
   saveMonthlyData: (student: Student, data: MonthlyJournalData) => Promise<void>;
 }
@@ -252,12 +253,97 @@ export function useDocumentGenerator(
     }
   }, [selectedYear, selectedMonth, saveMonthlyJournal, showToast]);
 
+  const generateBatchInRange = useCallback(
+    async (student: Student, startMonth: number, endMonth: number, progressCallback?: (month: number) => void) => {
+      setIsLoading(true);
+      try {
+        // 1. 연간 계획서 확보
+        let currentAnnual = annualData;
+        if (!currentAnnual) {
+          const existingAnnual = await getAnnualPlan(student.name, selectedYear);
+          if (existingAnnual) {
+            currentAnnual = existingAnnual;
+            setAnnualData(currentAnnual);
+          } else {
+            currentAnnual = await generateAnnualPlan(student);
+            await saveAnnualPlan(student.name, selectedYear, currentAnnual);
+            setAnnualData(currentAnnual);
+          }
+        }
+
+        // 2. 월별 순회하며 생성
+        const monthsToProcess = [];
+        if (startMonth <= endMonth) {
+          for (let m = startMonth; m <= endMonth; m++) monthsToProcess.push(m);
+        } else {
+          // 연도 걸침 (예: 11월 ~ 2월) - 현재 시스템은 단일 연도 내 처리가 기본이므로 로그만 남김
+          for (let m = startMonth; m <= 12; m++) monthsToProcess.push(m);
+          for (let m = 1; m <= endMonth; m++) monthsToProcess.push(m);
+        }
+
+        for (const m of monthsToProcess) {
+          if (progressCallback) progressCallback(m);
+
+          // 이미 데이터가 있는지 확인
+          const existing = await getMonthlyJournal(student.name, selectedYear, m);
+          if (existing) continue;
+
+          // 결제 내역 필터링
+          const filteredDates = filterDatesByYearMonth(student.paymentDates, selectedYear, m);
+          const monthlyGoal = currentAnnual.monthlyGoals.find((g) => g.month === m)?.goal || '목표 미설정';
+
+          let monthly: MonthlyJournalData;
+          if (filteredDates.length > 0) {
+            const studentWithDates = { ...student, paymentDates: filteredDates };
+            monthly = await generateMonthlyJournal(studentWithDates, m, monthlyGoal);
+          } else {
+            // 결제 내역 없으면 가상 날짜로 생성하거나 Mock 처리 (여기서는 Mock 폴백 패턴 활용)
+            monthly = {
+              currentLevel: '현재 치료 목표에 따른 활동을 수행 중임.',
+              monthlyGoal,
+              sessions: generateMockSessions(
+                // 임시로 해당 월의 1, 8, 15, 22일 생성
+                [1, 8, 15, 22].map(d => `${selectedYear}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`),
+                student.treatmentArea,
+                monthlyGoal
+              ),
+              result: '긍정적인 변화가 관찰되며 지속적인 지도가 필요함.',
+            };
+          }
+
+          // 저장
+          await saveMonthlyJournal(student.name, selectedYear, m, monthly);
+          
+          // 현재 활성화된 월이면 상태 업데이트
+          if (m === selectedMonth) {
+            setMonthlyData(monthly);
+          }
+        }
+
+        showToast({
+          type: 'success',
+          message: `${startMonth}월부터 ${endMonth}월까지 일지 생성을 완료했습니다.`,
+        });
+      } catch (error) {
+        console.error('Batch generation failed:', error);
+        showToast({
+          type: 'error',
+          message: '일괄 생성 중 오류가 발생했습니다.',
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [selectedYear, selectedMonth, annualData, getAnnualPlan, getMonthlyJournal, saveAnnualPlan, saveMonthlyJournal, showToast]
+  );
+
   return {
     annualData,
     monthlyData,
     isLoading,
     fetchData,
     generateDraft,
+    generateBatchInRange,
     saveAnnualData,
     saveMonthlyData,
   };

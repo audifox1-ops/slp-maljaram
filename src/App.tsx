@@ -36,6 +36,7 @@ import { FeatureGrid } from './components/home/FeatureGrid';
 import { StudentSidebar } from './components/docs/StudentSidebar';
 import { DocumentToolbar } from './components/docs/DocumentToolbar';
 import { DocumentPreview } from './components/docs/DocumentPreview';
+import { BatchGenerationModal } from './components/docs/BatchGenerationModal';
 
 
 // 기존 컴포넌트
@@ -50,6 +51,7 @@ export default function App() {
   const [activeTab, setActiveTab] = useState<'annual' | 'monthly'>('annual');
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+  const [isBatchModalOpen, setIsBatchModalOpen] = useState(false);
 
   const { showToast } = useToast();
 
@@ -81,6 +83,7 @@ export default function App() {
     isLoading: isDocLoading,
     fetchData,
     generateDraft,
+    generateBatchInRange,
     saveAnnualData,
     saveMonthlyData,
   } = useDocumentGenerator(selectedYear, selectedMonth);
@@ -330,6 +333,12 @@ export default function App() {
     }
   }, [selectedStudent, generateDraft]);
 
+  const handleBatchGenerate = useCallback((startMonth: number, endMonth: number) => {
+    if (selectedStudent) {
+      generateBatchInRange(selectedStudent, startMonth, endMonth);
+    }
+  }, [selectedStudent, generateBatchInRange]);
+
   // ─── 렌더링 ───
   const isAnyLoading = isLoading || isDocLoading;
 
@@ -395,6 +404,7 @@ export default function App() {
                 onDownloadHWPX={handleDownloadHWPX}
                 onPrint={handlePrint}
                 onGenerateDraft={handleGenerateDraft}
+                onOpenBatchModal={() => setIsBatchModalOpen(true)}
               />
             )}
 
@@ -412,6 +422,14 @@ export default function App() {
           </div>
         </main>
       )}
+
+      {/* 일괄 생성 모달 */}
+      <BatchGenerationModal 
+        isOpen={isBatchModalOpen}
+        onClose={() => setIsBatchModalOpen(false)}
+        onGenerate={handleBatchGenerate}
+        currentYear={selectedYear}
+      />
 
       {/* 푸터 */}
       <AppFooter />

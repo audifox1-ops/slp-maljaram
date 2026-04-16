@@ -19,6 +19,7 @@ interface DocumentToolbarProps {
   onDownloadHWPX: () => void;
   onPrint: () => void;
   onGenerateDraft: () => void;
+  onOpenBatchModal: () => void;
 }
 
 export const DocumentToolbar: React.FC<DocumentToolbarProps> = ({
@@ -34,6 +35,7 @@ export const DocumentToolbar: React.FC<DocumentToolbarProps> = ({
   onDownloadHWPX,
   onPrint,
   onGenerateDraft,
+  onOpenBatchModal,
 }) => {
   return (
     <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 no-print">
@@ -125,6 +127,17 @@ export const DocumentToolbar: React.FC<DocumentToolbarProps> = ({
           <Printer className="w-4 h-4" />
           인쇄하기
         </button>
+
+        {/* 기간별 일괄 생성 (월별일지 탭에서 항상 표시) */}
+        {activeTab === 'monthly' && (
+          <button
+            onClick={onOpenBatchModal}
+            className="flex items-center gap-2 px-6 py-2.5 bg-indigo-500 text-white rounded-xl font-bold text-sm hover:bg-indigo-600 transition-all shadow-lg shadow-indigo-500/20"
+          >
+            <Sparkles className="w-4 h-4" />
+            기간별 일괄 생성
+          </button>
+        )}
 
         {/* 가상 일지 생성 (월별일지 탭 + 세션이 없을 때만 표시) */}
         {activeTab === 'monthly' &&

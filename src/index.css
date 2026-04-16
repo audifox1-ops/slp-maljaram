@@ -39,31 +39,41 @@
       font-size: 11pt;
       line-height: 1.6;
       color: black;
+      background: white !important;
     }
-    /* Ensure tables don't break awkwardly */
+    /* 타이틀 및 섹션 간격 조정 */
+    .document-container h1, 
+    .document-container h2, 
+    .document-container h3 {
+      color: black !important;
+      margin-top: 1.5em !important;
+      margin-bottom: 0.5em !important;
+      page-break-after: avoid;
+    }
+    /* 테이블 스타일 강제 적용 */
     table {
       page-break-inside: auto;
       width: 100% !important;
       border-collapse: collapse !important;
+      margin-bottom: 1em;
     }
     tr {
       page-break-inside: avoid;
       page-break-after: auto;
     }
     th, td {
-      border: 1px solid #cbd5e1 !important;
-      padding: 8px !important;
-      font-size: 10.5pt !important;
+      border: 1px solid #000 !important; /* 인쇄 시 외곽선 뚜렷하게 */
+      padding: 6px 8px !important;
+      font-size: 10pt !important;
+      word-break: keep-all;
     }
     thead {
       display: table-header-group;
     }
-    tfoot {
-      display: table-footer-group;
-    }
-    h1, h2, h3, h4 {
-      break-after: avoid;
-      color: black !important;
+    /* 배경색 인쇄 허용 */
+    .bg-slate-50, .bg-slate-100, .bg-gray-50 {
+      background-color: #f8fafc !important;
+      -webkit-print-color-adjust: exact;
     }
   }
 }

@@ -66,6 +66,7 @@ export async function downloadAnnualPlanAsWord(
                   '소속 학교',
                   '장애 유형',
                   '치료 영역',
+                  '담당 치료사',
                   '치료 일정',
                 ].map(
                   (text) =>
@@ -118,32 +119,41 @@ export async function downloadAnnualPlanAsWord(
                     ],
                     borders,
                   }),
-                  new TableCell({
-                    children: [
-                      new Paragraph({
-                        children: [
-                          new TextRun({
-                            text: student.treatmentArea,
-                            bold: true,
-                          }),
-                        ],
-                        alignment: AlignmentType.CENTER,
-                      }),
-                    ],
-                    borders,
-                  }),
-                  new TableCell({
-                    children: [
-                      new Paragraph({
-                        text: `요일: ${student.schedule.day}`,
-                      }),
-                      new Paragraph({
-                        text: `시간: ${student.schedule.time}`,
-                      }),
-                      new Paragraph({ text: `시작: ${year}.3.` }),
-                    ],
-                    borders,
-                  }),
+                   new TableCell({
+                     children: [
+                       new Paragraph({
+                         children: [
+                           new TextRun({
+                             text: student.treatmentArea,
+                             bold: true,
+                           }),
+                         ],
+                         alignment: AlignmentType.CENTER,
+                       }),
+                     ],
+                     borders,
+                   }),
+                   new TableCell({
+                     children: [
+                       new Paragraph({
+                         text: student.therapistName,
+                         alignment: AlignmentType.CENTER,
+                       }),
+                     ],
+                     borders,
+                   }),
+                   new TableCell({
+                     children: [
+                       new Paragraph({
+                         text: `요일: ${student.schedule.day}`,
+                       }),
+                       new Paragraph({
+                         text: `시간: ${student.schedule.time}`,
+                       }),
+                       new Paragraph({ text: `시작: ${year}. 03.` }),
+                     ],
+                     borders,
+                   }),
                 ],
               }),
             ],

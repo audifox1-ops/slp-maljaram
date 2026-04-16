@@ -5,10 +5,11 @@
 interface ParsedDate {
   year: string;
   month: number;
+  day: number;
 }
 
 /**
- * 다양한 한국어 날짜 형식을 파싱하여 { year, month }를 반환합니다.
+ * 다양한 한국어 날짜 형식을 파싱하여 { year, month, day }를 반환합니다.
  * 지원 형식: "2026-04-16", "2026. 04. 16", "26년 4월 16일", "2026/04/16", "260416" 등
  */
 export function parseDateString(dateStr: string): ParsedDate | null {
@@ -21,7 +22,8 @@ export function parseDateString(dateStr: string): ParsedDate | null {
   if (match) {
     return { 
       year: match[1], 
-      month: parseInt(match[2], 10) 
+      month: parseInt(match[2], 10),
+      day: parseInt(match[3], 10)
     };
   }
 
@@ -29,10 +31,10 @@ export function parseDateString(dateStr: string): ParsedDate | null {
   // 예: "260416", "20260416"
   const noSepMatch = dStr.match(/^(\d{2,4})(\d{2})(\d{2})$/);
   if (noSepMatch) {
-    // 6자리(YYMMDD)인 경우 2자리 연도, 8자리(YYYYMMDD)인 경우 4자리 연도
     return { 
       year: noSepMatch[1], 
-      month: parseInt(noSepMatch[2], 10) 
+      month: parseInt(noSepMatch[2], 10),
+      day: parseInt(noSepMatch[3], 10)
     };
   }
 
@@ -41,7 +43,8 @@ export function parseDateString(dateStr: string): ParsedDate | null {
   if (numbers && numbers.length >= 2) {
     return { 
       year: numbers[0], 
-      month: parseInt(numbers[1], 10) 
+      month: parseInt(numbers[1], 10),
+      day: numbers[2] ? parseInt(numbers[2], 10) : 1
     };
   }
 
