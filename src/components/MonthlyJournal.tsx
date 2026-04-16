@@ -71,7 +71,7 @@ export const MonthlyJournal: React.FC<Props> = ({ student, data, month, year, on
       {/* Header Section */}
       <div className="flex justify-between items-start mb-6 pt-4">
         <div className="flex-1 text-center pt-6">
-          <h2 className="text-2xl font-bold tracking-[2px]">{year}. 교육청 치료지원(마중물) 대상 개별 치료 일지({month}월)</h2>
+          <h2 className="text-2xl font-bold tracking-[1px]">{year}. 교육청 치료지원 대상 개별 치료 일지({month.toString().padStart(2, '0')})월</h2>
         </div>
         <table className="border-collapse border border-black text-[0.7rem] w-32">
           <tbody>
@@ -141,7 +141,7 @@ export const MonthlyJournal: React.FC<Props> = ({ student, data, month, year, on
 
       {/* 현행 수준 */}
       <div className="flex border border-black border-b-0">
-        <div className="bg-slate-100 p-4 font-bold border-r border-black w-32 flex items-center justify-center text-[0.9rem]">현행 수준</div>
+        <div className="bg-slate-50 p-2 font-bold border-r border-black w-28 flex items-center justify-center text-[0.85rem]">현행 수준</div>
         <div className="p-3 text-[0.85rem] leading-relaxed flex-1 min-h-[60px]">
           {isEditing ? (
             <textarea
@@ -157,7 +157,7 @@ export const MonthlyJournal: React.FC<Props> = ({ student, data, month, year, on
 
       {/* 치료 목표 */}
       <div className="flex border border-black mb-6">
-        <div className="bg-slate-100 p-4 font-bold border-r border-black w-32 flex items-center justify-center text-[0.9rem]">({month})월 치료 목표</div>
+        <div className="bg-slate-50 p-2 font-bold border-r border-black w-28 flex items-center justify-center text-[0.85rem]">({month.toString().padStart(2, '0')})월 치료목표</div>
         <div className="p-3 text-[0.85rem] leading-relaxed flex-1 min-h-[60px]">
           {isEditing ? (
             <textarea
@@ -178,7 +178,7 @@ export const MonthlyJournal: React.FC<Props> = ({ student, data, month, year, on
             <th className="border border-black p-2 w-24 text-center">날짜</th>
             <th className="border border-black p-2 text-center">치료 내용</th>
             <th className="border border-black p-2 text-center">아동 반응</th>
-            <th className="border border-black p-2 w-28 text-center">비고<br/>(부모 상담)</th>
+            <th className="border border-black p-2 w-32 text-center">비고<br/>(부모 상담)</th>
           </tr>
         </thead>
         <tbody>
@@ -242,7 +242,7 @@ export const MonthlyJournal: React.FC<Props> = ({ student, data, month, year, on
 
       {/* 치료 결과 */}
       <div className="flex border border-black">
-        <div className="bg-slate-100 p-4 font-bold border-r border-black w-32 flex items-center justify-center text-[0.9rem]">({month})월 치료 결과</div>
+        <div className="bg-slate-50 p-2 font-bold border-r border-black w-28 flex items-center justify-center text-[0.85rem]">({month.toString().padStart(2, '0')})월 치료결과</div>
         <div className="p-3 text-[0.85rem] leading-relaxed flex-1 min-h-[80px]">
           {isEditing ? (
             <textarea

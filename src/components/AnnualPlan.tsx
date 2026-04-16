@@ -76,7 +76,7 @@ export const AnnualPlan: React.FC<Props> = ({ student, data, year, onSave }) => 
       {/* Header Section */}
       <div className="flex justify-between items-start mb-6 pt-4">
         <div className="flex-1 text-center pt-6">
-          <h2 className="text-2xl font-bold tracking-[2px]">{year}. 교육청 치료지원(마중물) 대상 연간 계획서</h2>
+          <h2 className="text-2xl font-bold tracking-[1px]">{year}. 교육청 치료지원 대상 연간 계획서</h2>
         </div>
         <table className="border-collapse border border-black text-[0.7rem] w-32">
           <tbody>
@@ -111,7 +111,7 @@ export const AnnualPlan: React.FC<Props> = ({ student, data, year, onSave }) => 
             <td className="border border-black p-2 text-center">{student.birthDate}</td>
             <td className="border border-black p-2 text-center">{student.school}</td>
             <td className="border border-black p-2 text-center">
-              {student.disabilityType}
+              {student.disabilityType || '-'}
             </td>
             <td className="border border-black p-2 text-center">
               <div className="font-bold mb-2">{student.treatmentArea}</div>
@@ -135,8 +135,12 @@ export const AnnualPlan: React.FC<Props> = ({ student, data, year, onSave }) => 
                     <td className="p-1 border-b border-black font-bold">{student.schedule.day}</td>
                   </tr>
                   <tr>
-                    <td className="p-1 border-r border-black bg-slate-50">시간</td>
-                    <td className="p-1 font-bold">{student.schedule.time}</td>
+                    <td className="p-1 border-b border-r border-black bg-slate-50">시간</td>
+                    <td className="p-1 border-b border-black font-bold">{student.schedule.time}</td>
+                  </tr>
+                  <tr>
+                    <td className="p-1 border-r border-black bg-slate-50">횟수</td>
+                    <td className="p-1 font-bold">주 {student.schedule.frequency} 회</td>
                   </tr>
                 </tbody>
               </table>
@@ -147,7 +151,7 @@ export const AnnualPlan: React.FC<Props> = ({ student, data, year, onSave }) => 
 
       {/* 현행 수준 */}
       <div className="mb-6 border border-black">
-        <div className="bg-slate-100 p-2 font-bold border-b border-black text-[0.9rem]">**[현행 수준 및 특성]**</div>
+        <div className="bg-slate-50 p-2 font-bold border-b border-black text-[0.85rem]">**[현행 수준]**</div>
         <div className="p-3 text-[0.85rem] leading-relaxed min-h-[80px]">
           <ul className="list-disc list-inside space-y-1">
             {editedData.currentLevel.map((item, idx) => (
@@ -170,7 +174,7 @@ export const AnnualPlan: React.FC<Props> = ({ student, data, year, onSave }) => 
 
       {/* 장기 목표 */}
       <div className="mb-6 border border-black">
-        <div className="bg-slate-100 p-2 font-bold border-b border-black text-[0.9rem]">**[장기 치료 목표]**</div>
+        <div className="bg-slate-50 p-2 font-bold border-b border-black text-[0.85rem]">**[장기 치료 목표]**</div>
         <div className="p-3 text-[0.85rem] leading-relaxed min-h-[80px]">
           <ul className="list-disc list-inside space-y-1">
             {editedData.longTermGoals.map((item, idx) => (
@@ -193,7 +197,7 @@ export const AnnualPlan: React.FC<Props> = ({ student, data, year, onSave }) => 
 
       {/* 연간 계획 */}
       <div className="border border-black">
-        <div className="bg-slate-100 p-2 font-bold border-b border-black text-[0.9rem]">**[연간 치료 계획]**</div>
+        <div className="bg-slate-50 p-2 font-bold border-b border-black text-[0.85rem]">**[연간 치료 계획]**</div>
         <table className="w-full border-collapse text-[0.8rem]">
           <thead>
             <tr className="bg-slate-50">
