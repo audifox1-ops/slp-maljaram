@@ -6,6 +6,7 @@
  * 이 파일은 이들을 조합하는 역할만 수행합니다.
  */
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import { Student, StudentInfo } from './types';
 import {
   downloadAnnualPlanAsWord,
@@ -343,8 +344,13 @@ export default function App() {
   const isAnyLoading = isLoading || isDocLoading;
 
   return (
-    <div className="min-h-screen flex flex-col bg-bg-theme selection:bg-primary/10">
-      {/* 헤더 */}
+    <div className="min-h-screen flex flex-col bg-bg-theme selection:bg-primary/20">
+      {/* 글로벌 배경 효과 */}
+      <div className="fixed inset-0 pointer-events-none -z-10 overflow-hidden">
+        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[100px] translate-x-1/2 -translate-y-1/2" />
+        <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-accent/5 rounded-full blur-[100px] -translate-x-1/2 translate-y-1/2" />
+      </div>
+
       <AppHeader
         currentView={currentView}
         setCurrentView={setCurrentView}
@@ -352,78 +358,114 @@ export default function App() {
         onNewUpload={resetUpload}
       />
 
-      {/* 학생 정보 관리 뷰 */}
-      {currentView === 'students' ? (
-        <main className="flex-1 p-6 md:p-10 max-w-5xl mx-auto w-full">
-          <StudentManagement
-            studentInfos={studentInfos}
-            onAdd={addStudent}
-            onUpdate={updateStudent}
-            onDelete={deleteStudent}
-          />
-        </main>
-      ) : /* 서류 생성 뷰 - 데이터 미로드 상태 */
-      !isDataLoaded && allPaymentRecords.length === 0 ? (
-        <main className="flex-1 flex flex-col items-center justify-center p-6 md:p-10">
-          <HeroSection />
-          <FileUploadCard
-            fileInputRef={fileInputRef}
-            onFileUpload={handleFileUpload}
-            onFileDrop={processFile}
-          />
-          <FeatureGrid />
-        </main>
-      ) : (
-        /* 서류 생성 뷰 - 데이터 로드 완료 */
-        <main className="flex-1 flex min-h-0">
-          {/* 학생 사이드바 */}
-          <StudentSidebar
-            searchTerm={searchTerm}
-            setSearchTerm={setSearchTerm}
-            filteredStudents={filteredStudents}
-            selectedStudent={selectedStudent}
-            studentInfos={studentInfos}
-            onStudentSelect={handleStudentSelect}
-            onAutoRegister={handleAutoRegister}
-            onResetAllData={resetAllData}
-          />
-
-          {/* 메인 문서 영역 */}
-          <div className="flex-1 flex flex-col p-6 md:p-10 gap-6 overflow-auto">
-            {selectedStudent && (
-              <DocumentToolbar
-                selectedStudent={selectedStudent}
-                activeTab={activeTab}
-                setActiveTab={setActiveTab}
-                selectedYear={selectedYear}
-                setSelectedYear={setSelectedYear}
-                selectedMonth={selectedMonth}
-                setSelectedMonth={setSelectedMonth}
-                monthlyData={monthlyData}
-                onDownloadWord={handleDownloadWord}
-                onDownloadHWPX={handleDownloadHWPX}
-                onPrint={handlePrint}
-                onGenerateDraft={handleGenerateDraft}
-                onOpenBatchModal={() => setIsBatchModalOpen(true)}
-              />
-            )}
-
-            <DocumentPreview
-              selectedStudent={selectedStudent}
-              activeTab={activeTab}
-              annualData={annualData}
-              monthlyData={monthlyData}
-              isLoading={isAnyLoading}
-              selectedYear={selectedYear}
-              selectedMonth={selectedMonth}
-              onSaveAnnual={(data) => selectedStudent && saveAnnualData(selectedStudent, data)}
-              onSaveMonthly={(data) => selectedStudent && saveMonthlyData(selectedStudent, data)}
+      <AnimatePresence mode="wait">
+        {currentView === 'students' ? (
+          <motion.main
+            key="students"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="flex-1 p-6 md:p-10 max-w-5xl mx-auto w-full"
+          >
+            <StudentManagement
+              studentInfos={studentInfos}
+              onAdd={addStudent}
+              onUpdate={updateStudent}
+              onDelete={deleteStudent}
             />
-          </div>
-        </main>
-      )}
+          </motion.main>
+        ) : !isDataLoaded && allPaymentRecords.length === 0 ? (
+          <motion.main
+            key="landing"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="flex-1 flex flex-col items-center justify-center p-6 md:p-10"
+          >
+            <HeroSection />
+            <FileUploadCard
+              fileInputRef={fileInputRef}
+              onFileUpload={handleFileUpload}
+              onFileDrop={processFile}
+            />
+            <FeatureGrid />
+          </motion.main>
+        ) : (
+          <motion.main
+            key="docs"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="flex-1 flex min-h-0"
+          >
+            <StudentSidebar
+              searchTerm={searchTerm}
+              setSearchTerm={setSearchTerm}
+              filteredStudents={filteredStudents}
+              selectedStudent={selectedStudent}
+              studentInfos={studentInfos}
+              onStudentSelect={handleStudentSelect}
+              onAutoRegister={handleAutoRegister}
+              onResetAllData={resetAllData}
+            />
 
-      {/* 일괄 생성 모달 */}
+            <div className="flex-1 flex flex-col p-6 md:p-10 gap-8 overflow-auto">
+              <AnimatePresence mode="wait">
+                {selectedStudent ? (
+                  <motion.div
+                    key={selectedStudent.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+                    className="flex flex-col gap-8 pb-20"
+                  >
+                    <DocumentToolbar
+                      selectedStudent={selectedStudent}
+                      activeTab={activeTab}
+                      setActiveTab={setActiveTab}
+                      selectedYear={selectedYear}
+                      setSelectedYear={setSelectedYear}
+                      selectedMonth={selectedMonth}
+                      setSelectedMonth={setSelectedMonth}
+                      monthlyData={monthlyData}
+                      onDownloadWord={handleDownloadWord}
+                      onDownloadHWPX={handleDownloadHWPX}
+                      onPrint={handlePrint}
+                      onGenerateDraft={handleGenerateDraft}
+                      onOpenBatchModal={() => setIsBatchModalOpen(true)}
+                    />
+
+                    <DocumentPreview
+                      selectedStudent={selectedStudent}
+                      activeTab={activeTab}
+                      annualData={annualData}
+                      monthlyData={monthlyData}
+                      isLoading={isAnyLoading}
+                      selectedYear={selectedYear}
+                      selectedMonth={selectedMonth}
+                      onSaveAnnual={(data) => selectedStudent && saveAnnualData(selectedStudent, data)}
+                      onSaveMonthly={(data) => selectedStudent && saveMonthlyData(selectedStudent, data)}
+                    />
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    key="no-selection"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="flex-1 flex flex-col items-center justify-center text-center py-20"
+                  >
+                    <div className="w-20 h-20 bg-primary/5 rounded-[2rem] flex items-center justify-center mb-6">
+                      <div className="w-10 h-10 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
+                    </div>
+                    <h3 className="text-xl font-black text-text-main mb-2">분석 완료</h3>
+                    <p className="text-text-muted font-medium">왼쪽 목록에서 학생을 선택하여 서류를 생성해 보세요.</p>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          </motion.main>
+        )}
+      </AnimatePresence>
+
       <BatchGenerationModal 
         isOpen={isBatchModalOpen}
         onClose={() => setIsBatchModalOpen(false)}
@@ -431,7 +473,6 @@ export default function App() {
         currentYear={selectedYear}
       />
 
-      {/* 푸터 */}
       <AppFooter />
     </div>
   );

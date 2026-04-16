@@ -1,8 +1,10 @@
+import { Student, AnnualPlanData, MonthlyJournalData } from '../types';
+
 /**
  * Word 문서 내보내기 서비스
- * App.tsx의 handleDownloadWord 로직(~200줄)을 분리합니다.
  */
-import { Student, AnnualPlanData, MonthlyJournalData } from '../types';
+
+const FONT_NAME = "맑은 고딕";
 
 /**
  * 연간계획서를 Word 문서로 다운로드합니다.
@@ -23,13 +25,14 @@ export async function downloadAnnualPlanAsWord(
     WidthType,
     AlignmentType,
     BorderStyle,
+    VerticalAlign,
   } = await import('docx');
   const { saveAs } = await import('file-saver');
 
   const createBorder = () => ({
     style: BorderStyle.SINGLE,
-    size: 1,
-    color: '000000',
+    size: 2,
+    color: '334155',
   });
 
   const borders = {
@@ -50,10 +53,11 @@ export async function downloadAnnualPlanAsWord(
               new TextRun({
                 text: `${year}. 교육청 치료지원(마중물) 대상 연간 계획서`,
                 bold: true,
-                size: 32,
+                size: 36,
+                font: FONT_NAME,
               }),
             ],
-            spacing: { after: 400 },
+            spacing: { after: 600 },
           }),
           // 기본 정보 테이블
           new Table({
@@ -72,10 +76,14 @@ export async function downloadAnnualPlanAsWord(
                   (text) =>
                     new TableCell({
                       children: [
-                        new Paragraph({ text, alignment: AlignmentType.CENTER }),
+                        new Paragraph({ 
+                          children: [new TextRun({ text, font: FONT_NAME, bold: true })],
+                          alignment: AlignmentType.CENTER 
+                        }),
                       ],
-                      shading: { fill: 'F1F5F9' },
+                      shading: { fill: 'F8FAFC' },
                       borders,
+                      verticalAlign: VerticalAlign.CENTER,
                     })
                 ),
               }),
@@ -84,105 +92,124 @@ export async function downloadAnnualPlanAsWord(
                   new TableCell({
                     children: [
                       new Paragraph({
+                        children: [new TextRun({ text: student.name, bold: true, font: FONT_NAME })],
+                        alignment: AlignmentType.CENTER,
+                      }),
+                    ],
+                    borders,
+                    verticalAlign: VerticalAlign.CENTER,
+                  }),
+                  new TableCell({
+                    children: [
+                      new Paragraph({
+                        children: [new TextRun({ text: student.birthDate, font: FONT_NAME })],
+                        alignment: AlignmentType.CENTER,
+                      }),
+                    ],
+                    borders,
+                    verticalAlign: VerticalAlign.CENTER,
+                  }),
+                  new TableCell({
+                    children: [
+                      new Paragraph({
+                        children: [new TextRun({ text: student.school, font: FONT_NAME })],
+                        alignment: AlignmentType.CENTER,
+                      }),
+                    ],
+                    borders,
+                    verticalAlign: VerticalAlign.CENTER,
+                  }),
+                  new TableCell({
+                    children: [
+                      new Paragraph({
+                        children: [new TextRun({ text: student.disabilityType, font: FONT_NAME })],
+                        alignment: AlignmentType.CENTER,
+                      }),
+                    ],
+                    borders,
+                    verticalAlign: VerticalAlign.CENTER,
+                  }),
+                  new TableCell({
+                    children: [
+                      new Paragraph({
                         children: [
-                          new TextRun({ text: student.name, bold: true }),
+                          new TextRun({
+                            text: student.treatmentArea,
+                            bold: true,
+                            font: FONT_NAME,
+                          }),
                         ],
                         alignment: AlignmentType.CENTER,
                       }),
                     ],
                     borders,
+                    verticalAlign: VerticalAlign.CENTER,
                   }),
                   new TableCell({
                     children: [
                       new Paragraph({
-                        text: student.birthDate,
+                        children: [new TextRun({ text: student.therapistName, font: FONT_NAME })],
                         alignment: AlignmentType.CENTER,
                       }),
                     ],
                     borders,
+                    verticalAlign: VerticalAlign.CENTER,
                   }),
                   new TableCell({
                     children: [
                       new Paragraph({
-                        text: student.school,
-                        alignment: AlignmentType.CENTER,
+                        children: [new TextRun({ text: `요일: ${student.schedule.day}`, font: FONT_NAME, size: 18 })],
                       }),
-                    ],
-                    borders,
-                  }),
-                  new TableCell({
-                    children: [
                       new Paragraph({
-                        text: student.disabilityType,
-                        alignment: AlignmentType.CENTER,
+                        children: [new TextRun({ text: `시간: ${student.schedule.time}`, font: FONT_NAME, size: 18 })],
+                      }),
+                      new Paragraph({ 
+                        children: [new TextRun({ text: `시작: ${year}. 03.`, font: FONT_NAME, size: 18 })],
                       }),
                     ],
                     borders,
+                    verticalAlign: VerticalAlign.CENTER,
                   }),
-                   new TableCell({
-                     children: [
-                       new Paragraph({
-                         children: [
-                           new TextRun({
-                             text: student.treatmentArea,
-                             bold: true,
-                           }),
-                         ],
-                         alignment: AlignmentType.CENTER,
-                       }),
-                     ],
-                     borders,
-                   }),
-                   new TableCell({
-                     children: [
-                       new Paragraph({
-                         text: student.therapistName,
-                         alignment: AlignmentType.CENTER,
-                       }),
-                     ],
-                     borders,
-                   }),
-                   new TableCell({
-                     children: [
-                       new Paragraph({
-                         text: `요일: ${student.schedule.day}`,
-                       }),
-                       new Paragraph({
-                         text: `시간: ${student.schedule.time}`,
-                       }),
-                       new Paragraph({ text: `시작: ${year}. 03.` }),
-                     ],
-                     borders,
-                   }),
                 ],
               }),
             ],
           }),
-          new Paragraph({ text: '', spacing: { before: 200 } }),
+          new Paragraph({ text: '', spacing: { before: 400 } }),
           new Paragraph({
             children: [
-              new TextRun({ text: '[현행 수준 및 특성]', bold: true }),
+              new TextRun({ text: '▣ 현행 수준 및 특성', bold: true, font: FONT_NAME, size: 24 }),
             ],
+            spacing: { after: 200 },
           }),
           ...data.currentLevel.map(
             (text) =>
-              new Paragraph({ text: `• ${text}`, indent: { left: 240 } })
+              new Paragraph({ 
+                children: [new TextRun({ text: `• ${text}`, font: FONT_NAME })],
+                indent: { left: 440 },
+                spacing: { after: 120 },
+              })
           ),
-          new Paragraph({ text: '', spacing: { before: 200 } }),
+          new Paragraph({ text: '', spacing: { before: 400 } }),
           new Paragraph({
             children: [
-              new TextRun({ text: '[장기 치료 목표]', bold: true }),
+              new TextRun({ text: '▣ 장기 치료 목표', bold: true, font: FONT_NAME, size: 24 }),
             ],
+            spacing: { after: 200 },
           }),
           ...data.longTermGoals.map(
             (text) =>
-              new Paragraph({ text: `• ${text}`, indent: { left: 240 } })
+              new Paragraph({ 
+                children: [new TextRun({ text: `• ${text}`, font: FONT_NAME })],
+                indent: { left: 440 },
+                spacing: { after: 120 },
+              })
           ),
-          new Paragraph({ text: '', spacing: { before: 200 } }),
+          new Paragraph({ text: '', spacing: { before: 400 } }),
           new Paragraph({
             children: [
-              new TextRun({ text: '[연간 치료 계획]', bold: true }),
+              new TextRun({ text: '▣ 연간 치료 계획', bold: true, font: FONT_NAME, size: 24 }),
             ],
+            spacing: { after: 200 },
           }),
           new Table({
             width: { size: 100, type: WidthType.PERCENTAGE },
@@ -192,10 +219,14 @@ export async function downloadAnnualPlanAsWord(
                   (text) =>
                     new TableCell({
                       children: [
-                        new Paragraph({ text, alignment: AlignmentType.CENTER }),
+                        new Paragraph({ 
+                          children: [new TextRun({ text, font: FONT_NAME, bold: true })],
+                          alignment: AlignmentType.CENTER 
+                        }),
                       ],
-                      shading: { fill: 'F1F5F9' },
+                      shading: { fill: 'F8FAFC' },
                       borders,
+                      verticalAlign: VerticalAlign.CENTER,
                     })
                 ),
               }),
@@ -206,19 +237,24 @@ export async function downloadAnnualPlanAsWord(
                       new TableCell({
                         children: [
                           new Paragraph({
-                            text: `${goal.month}월`,
+                            children: [new TextRun({ text: `${goal.month}월`, font: FONT_NAME })],
                             alignment: AlignmentType.CENTER,
                           }),
                         ],
                         borders,
+                        verticalAlign: VerticalAlign.CENTER,
                       }),
                       new TableCell({
-                        children: [new Paragraph({ text: goal.goal })],
+                        children: [new Paragraph({ children: [new TextRun({ text: goal.goal, font: FONT_NAME })] })],
                         borders,
+                        verticalAlign: VerticalAlign.CENTER,
+                        margins: { left: 100, right: 100 },
                       }),
                       new TableCell({
-                        children: [new Paragraph({ text: goal.content })],
+                        children: [new Paragraph({ children: [new TextRun({ text: goal.content, font: FONT_NAME })] })],
                         borders,
+                        verticalAlign: VerticalAlign.CENTER,
+                        margins: { left: 100, right: 100 },
                       }),
                     ],
                   })
@@ -254,13 +290,14 @@ export async function downloadMonthlyJournalAsWord(
     WidthType,
     AlignmentType,
     BorderStyle,
+    VerticalAlign,
   } = await import('docx');
   const { saveAs } = await import('file-saver');
 
   const createBorder = () => ({
     style: BorderStyle.SINGLE,
-    size: 1,
-    color: '000000',
+    size: 2,
+    color: '334155',
   });
 
   const borders = {
@@ -281,10 +318,11 @@ export async function downloadMonthlyJournalAsWord(
               new TextRun({
                 text: `${year}. 교육청 치료지원(마중물) 대상 개별 치료 일지(${month}월)`,
                 bold: true,
-                size: 32,
+                size: 36,
+                font: FONT_NAME,
               }),
             ],
-            spacing: { after: 400 },
+            spacing: { after: 600 },
           }),
           // 기본 정보 테이블
           new Table({
@@ -302,10 +340,14 @@ export async function downloadMonthlyJournalAsWord(
                   (text) =>
                     new TableCell({
                       children: [
-                        new Paragraph({ text, alignment: AlignmentType.CENTER }),
+                        new Paragraph({ 
+                          children: [new TextRun({ text, font: FONT_NAME, bold: true })],
+                          alignment: AlignmentType.CENTER 
+                        }),
                       ],
-                      shading: { fill: 'F1F5F9' },
+                      shading: { fill: 'F8FAFC' },
                       borders,
+                      verticalAlign: VerticalAlign.CENTER,
                     })
                 ),
               }),
@@ -314,40 +356,42 @@ export async function downloadMonthlyJournalAsWord(
                   new TableCell({
                     children: [
                       new Paragraph({
-                        children: [
-                          new TextRun({ text: student.name, bold: true }),
-                        ],
+                        children: [new TextRun({ text: student.name, bold: true, font: FONT_NAME })],
                         alignment: AlignmentType.CENTER,
                       }),
                     ],
                     borders,
+                    verticalAlign: VerticalAlign.CENTER,
                   }),
                   new TableCell({
                     children: [
                       new Paragraph({
-                        text: student.birthDate,
+                        children: [new TextRun({ text: student.birthDate, font: FONT_NAME })],
                         alignment: AlignmentType.CENTER,
                       }),
                     ],
                     borders,
+                    verticalAlign: VerticalAlign.CENTER,
                   }),
                   new TableCell({
                     children: [
                       new Paragraph({
-                        text: student.school,
+                        children: [new TextRun({ text: student.school, font: FONT_NAME })],
                         alignment: AlignmentType.CENTER,
                       }),
                     ],
                     borders,
+                    verticalAlign: VerticalAlign.CENTER,
                   }),
                   new TableCell({
                     children: [
                       new Paragraph({
-                        text: student.disabilityType,
+                        children: [new TextRun({ text: student.disabilityType, font: FONT_NAME })],
                         alignment: AlignmentType.CENTER,
                       }),
                     ],
                     borders,
+                    verticalAlign: VerticalAlign.CENTER,
                   }),
                   new TableCell({
                     children: [
@@ -356,29 +400,32 @@ export async function downloadMonthlyJournalAsWord(
                           new TextRun({
                             text: student.treatmentArea,
                             bold: true,
+                            font: FONT_NAME,
                           }),
                         ],
                         alignment: AlignmentType.CENTER,
                       }),
                     ],
                     borders,
+                    verticalAlign: VerticalAlign.CENTER,
                   }),
                   new TableCell({
                     children: [
                       new Paragraph({
-                        text: `요일: ${student.schedule.day}`,
+                        children: [new TextRun({ text: `요일: ${student.schedule.day}`, font: FONT_NAME, size: 18 })],
                       }),
                       new Paragraph({
-                        text: `시간: ${student.schedule.time}`,
+                        children: [new TextRun({ text: `시간: ${student.schedule.time}`, font: FONT_NAME, size: 18 })],
                       }),
                     ],
                     borders,
+                    verticalAlign: VerticalAlign.CENTER,
                   }),
                 ],
               }),
             ],
           }),
-          new Paragraph({ text: '', spacing: { before: 200 } }),
+          new Paragraph({ text: '', spacing: { before: 400 } }),
           // 현행 수준 + 치료 목표
           new Table({
             width: { size: 100, type: WidthType.PERCENTAGE },
@@ -389,19 +436,23 @@ export async function downloadMonthlyJournalAsWord(
                     children: [
                       new Paragraph({
                         children: [
-                          new TextRun({ text: '현행 수준', bold: true }),
+                          new TextRun({ text: '현행 수준', bold: true, font: FONT_NAME }),
                         ],
+                        alignment: AlignmentType.CENTER,
                       }),
                     ],
-                    shading: { fill: 'F1F5F9' },
+                    shading: { fill: 'F8FAFC' },
                     borders,
                     width: { size: 20, type: WidthType.PERCENTAGE },
+                    verticalAlign: VerticalAlign.CENTER,
                   }),
                   new TableCell({
                     children: [
-                      new Paragraph({ text: data.currentLevel }),
+                      new Paragraph({ children: [new TextRun({ text: data.currentLevel, font: FONT_NAME })] }),
                     ],
                     borders,
+                    verticalAlign: VerticalAlign.CENTER,
+                    margins: { left: 100, top: 100, bottom: 100 },
                   }),
                 ],
               }),
@@ -411,24 +462,28 @@ export async function downloadMonthlyJournalAsWord(
                     children: [
                       new Paragraph({
                         children: [
-                          new TextRun({ text: '치료 목표', bold: true }),
+                          new TextRun({ text: '치료 목표', bold: true, font: FONT_NAME }),
                         ],
+                        alignment: AlignmentType.CENTER,
                       }),
                     ],
-                    shading: { fill: 'F1F5F9' },
+                    shading: { fill: 'F8FAFC' },
                     borders,
+                    verticalAlign: VerticalAlign.CENTER,
                   }),
                   new TableCell({
                     children: [
-                      new Paragraph({ text: data.monthlyGoal }),
+                      new Paragraph({ children: [new TextRun({ text: data.monthlyGoal, font: FONT_NAME })] }),
                     ],
                     borders,
+                    verticalAlign: VerticalAlign.CENTER,
+                    margins: { left: 100, top: 100, bottom: 100 },
                   }),
                 ],
               }),
             ],
           }),
-          new Paragraph({ text: '', spacing: { before: 200 } }),
+          new Paragraph({ text: '', spacing: { before: 400 } }),
           // 회기별 테이블
           new Table({
             width: { size: 100, type: WidthType.PERCENTAGE },
@@ -438,10 +493,14 @@ export async function downloadMonthlyJournalAsWord(
                   (text) =>
                     new TableCell({
                       children: [
-                        new Paragraph({ text, alignment: AlignmentType.CENTER }),
+                        new Paragraph({ 
+                          children: [new TextRun({ text, font: FONT_NAME, bold: true })],
+                          alignment: AlignmentType.CENTER 
+                        }),
                       ],
-                      shading: { fill: 'F1F5F9' },
+                      shading: { fill: 'F8FAFC' },
                       borders,
+                      verticalAlign: VerticalAlign.CENTER,
                     })
                 ),
               }),
@@ -452,32 +511,39 @@ export async function downloadMonthlyJournalAsWord(
                       new TableCell({
                         children: [
                           new Paragraph({
-                            text: session.date,
+                            children: [new TextRun({ text: session.date, font: FONT_NAME, size: 18 })],
                             alignment: AlignmentType.CENTER,
                           }),
                         ],
                         borders,
+                        verticalAlign: VerticalAlign.CENTER,
                       }),
                       new TableCell({
-                        children: [new Paragraph({ text: session.content })],
+                        children: [new Paragraph({ children: [new TextRun({ text: session.content, font: FONT_NAME })] })],
                         borders,
+                        verticalAlign: VerticalAlign.CENTER,
+                        margins: { left: 100, top: 100, bottom: 100 },
                       }),
                       new TableCell({
-                        children: [new Paragraph({ text: session.reaction })],
+                        children: [new Paragraph({ children: [new TextRun({ text: session.reaction, font: FONT_NAME })] })],
                         borders,
+                        verticalAlign: VerticalAlign.CENTER,
+                        margins: { left: 100, top: 100, bottom: 100 },
                       }),
                       new TableCell({
                         children: [
-                          new Paragraph({ text: session.consultation }),
+                          new Paragraph({ children: [new TextRun({ text: session.consultation, font: FONT_NAME, size: 18 })] }),
                         ],
                         borders,
+                        verticalAlign: VerticalAlign.CENTER,
+                        margins: { left: 100, top: 100, bottom: 100 },
                       }),
                     ],
                   })
               ),
             ],
           }),
-          new Paragraph({ text: '', spacing: { before: 200 } }),
+          new Paragraph({ text: '', spacing: { before: 400 } }),
           // 치료 결과
           new Table({
             width: { size: 100, type: WidthType.PERCENTAGE },
@@ -488,17 +554,21 @@ export async function downloadMonthlyJournalAsWord(
                     children: [
                       new Paragraph({
                         children: [
-                          new TextRun({ text: '치료 결과', bold: true }),
+                          new TextRun({ text: '치료 결과', bold: true, font: FONT_NAME }),
                         ],
+                        alignment: AlignmentType.CENTER,
                       }),
                     ],
-                    shading: { fill: 'F1F5F9' },
+                    shading: { fill: 'F8FAFC' },
                     borders,
                     width: { size: 20, type: WidthType.PERCENTAGE },
+                    verticalAlign: VerticalAlign.CENTER,
                   }),
                   new TableCell({
-                    children: [new Paragraph({ text: data.result })],
+                    children: [new Paragraph({ children: [new TextRun({ text: data.result, font: FONT_NAME })] })],
                     borders,
+                    verticalAlign: VerticalAlign.CENTER,
+                    margins: { left: 100, top: 100, bottom: 100 },
                   }),
                 ],
               }),

@@ -31,40 +31,40 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
   }, []);
 
   return (
-    <header className="bg-white/80 backdrop-blur-md border-b border-border-theme h-[72px] px-6 md:px-10 flex items-center justify-between no-print sticky top-0 z-40 flex-shrink-0">
+    <header className="glass-effect h-[76px] px-6 md:px-10 flex items-center justify-between no-print sticky top-0 z-40 flex-shrink-0">
       <div className="flex items-center gap-4">
-        <div className="flex items-center gap-2 font-extrabold text-xl text-primary tracking-tight">
-          <div className="bg-primary p-1.5 rounded-lg">
+        <div className="flex items-center gap-2.5 font-extrabold text-2xl text-primary tracking-tight">
+          <div className="bg-primary p-2 rounded-xl shadow-lg shadow-primary/20">
             <FileText className="w-5 h-5 text-white" />
           </div>
-          <span>SLP.Docs</span>
+          <span className="text-gradient">SLP.Docs</span>
         </div>
         
         {currentDate && (
-          <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 bg-slate-100 rounded-md text-sm font-medium text-slate-600 border border-slate-200 shadow-sm ml-2">
-            <Calendar className="w-4 h-4 text-primary" />
+          <div className="hidden lg:flex items-center gap-2 px-4 py-1.5 bg-white/50 rounded-full text-xs font-bold text-slate-500 border border-white/40 shadow-sm ml-4">
+            <Calendar className="w-3.5 h-3.5 text-accent" />
             {currentDate}
           </div>
         )}
       </div>
 
-      <nav className="hidden md:flex items-center gap-1 bg-slate-100 p-1 rounded-xl no-print">
+      <nav className="hidden md:flex items-center gap-1.5 bg-slate-100/50 p-1.5 rounded-2xl no-print border border-slate-200/50">
         <button
           onClick={() => setCurrentView('docs')}
-          className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${
+          className={`px-5 py-2 rounded-xl text-sm font-bold transition-all duration-300 ${
             currentView === 'docs'
-              ? 'bg-white text-primary shadow-sm'
-              : 'text-text-muted hover:text-text-main'
+              ? 'bg-white text-primary shadow-md shadow-primary/5'
+              : 'text-text-muted hover:text-text-main hover:bg-white/40'
           }`}
         >
           서류 생성
         </button>
         <button
           onClick={() => setCurrentView('students')}
-          className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${
+          className={`px-5 py-2 rounded-xl text-sm font-bold transition-all duration-300 ${
             currentView === 'students'
-              ? 'bg-white text-primary shadow-sm'
-              : 'text-text-muted hover:text-text-main'
+              ? 'bg-white text-primary shadow-md shadow-primary/5'
+              : 'text-text-muted hover:text-text-main hover:bg-white/40'
           }`}
         >
           학생 정보 관리
@@ -75,10 +75,10 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
         {isDataLoaded && (
           <button
             onClick={onNewUpload}
-            className="text-sm font-semibold text-text-muted hover:text-primary transition-colors flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-primary-light"
+            className="text-sm font-bold text-text-muted hover:text-primary transition-all flex items-center gap-2 px-4 py-2 rounded-xl hover:bg-primary-light active:scale-95"
           >
             <Upload className="w-4 h-4" />
-            새 파일 업로드
+            <span>새 파일 업로드</span>
           </button>
         )}
       </div>
