@@ -2,16 +2,16 @@ import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 
-// 환경 변수에서 구성을 읽어옵니다. (Vite 환경)
+// 환경 변수에서 구성을 읽어오되, 누락 시 실제 데이터가 있는 프로젝트(gen-lang-client-0159907695)를 기본값으로 사용합니다.
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || `${import.meta.env.VITE_FIREBASE_PROJECT_ID}.firebasestorage.app`,
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-  appId: import.meta.env.VITE_FIREBASE_APP_ID,
-  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
-  firestoreDatabaseId: import.meta.env.VITE_FIREBASE_DATABASE_ID,
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "AIzaSyAPc36awDxHcFuzQTW_sNvbvJTliF48acQ",
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "gen-lang-client-0159907695.firebaseapp.com",
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "gen-lang-client-0159907695",
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || "gen-lang-client-0159907695.firebasestorage.app",
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "420938473723",
+  appId: import.meta.env.VITE_FIREBASE_APP_ID || "1:420938473723:web:41a59d5b4fa8e77696505e",
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID || "",
+  firestoreDatabaseId: import.meta.env.VITE_FIREBASE_DATABASE_ID || "ai-studio-f6c3d59c-c8ab-4ba0-973b-32245977679a",
 };
 
 const app = initializeApp(firebaseConfig);
