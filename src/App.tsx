@@ -11,6 +11,10 @@ import {
   downloadAnnualPlanAsWord,
   downloadMonthlyJournalAsWord,
 } from './services/wordExportService';
+import {
+  downloadAnnualPlanAsHWPX,
+  downloadMonthlyJournalAsHWPX,
+} from './services/hwpxExportService';
 
 // 커스텀 훅
 import { useStudents } from './hooks/useStudents';
@@ -277,6 +281,46 @@ export default function App() {
     monthlyData,
     selectedYear,
     selectedMonth,
+    showToast,
+  ]);
+
+  // ─── HWPX 다운로드 핸들러 ───
+  const handleDownloadHWPX = useCallback(async () => {
+    if (!selectedStudent) return;
+
+    setIsLoading(true);
+    try {
+      if (activeTab === 'annual' && annualData) {
+        await downloadAnnualPlanAsHWPX(selectedStudent, annualData, selectedYear);
+      } else if (activeTab === 'monthly' && monthlyData) {
+        await downloadMonthlyJournalAsHWPX(
+          selectedStudent,
+          monthlyData,
+          selectedMonth,
+          selectedYear
+        );
+      }
+      showToast({
+        type: 'success',
+        message: '한글 문서(HWPX)가 성공적으로 생성되었습니다.',
+      }, 3000);
+    } catch (err) {
+      console.error('HWPX download failed:', err);
+      showToast({
+        type: 'error',
+        message: '한글 문서 생성 중 오류가 발생했습니다. 템플릿 파일 존재 여부를 확인해 주세요.',
+      }, 5000);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [
+    selectedStudent,
+    activeTab,
+    annualData,
+    monthlyData,
+    selectedYear,
+    selectedMonth,
+    showToast,
   ]);
 
   // ─── 가상 일지 생성 핸들러 ───
@@ -348,6 +392,7 @@ export default function App() {
                 setSelectedMonth={setSelectedMonth}
                 monthlyData={monthlyData}
                 onDownloadWord={handleDownloadWord}
+                onDownloadHWPX={handleDownloadHWPX}
                 onPrint={handlePrint}
                 onGenerateDraft={handleGenerateDraft}
               />

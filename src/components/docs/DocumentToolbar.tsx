@@ -16,6 +16,7 @@ interface DocumentToolbarProps {
   setSelectedMonth: (month: number) => void;
   monthlyData: MonthlyJournalData | null;
   onDownloadWord: () => void;
+  onDownloadHWPX: () => void;
   onPrint: () => void;
   onGenerateDraft: () => void;
 }
@@ -30,6 +31,7 @@ export const DocumentToolbar: React.FC<DocumentToolbarProps> = ({
   setSelectedMonth,
   monthlyData,
   onDownloadWord,
+  onDownloadHWPX,
   onPrint,
   onGenerateDraft,
 }) => {
@@ -103,7 +105,16 @@ export const DocumentToolbar: React.FC<DocumentToolbarProps> = ({
           className="flex items-center gap-2 px-6 py-2.5 bg-white border border-primary text-primary rounded-xl font-bold text-sm hover:bg-primary-light transition-all"
         >
           <Download className="w-4 h-4" />
-          워드 다운로드
+          Word
+        </button>
+
+        {/* HWPX 다운로드 */}
+        <button
+          onClick={onDownloadHWPX}
+          className="flex items-center gap-2 px-6 py-2.5 bg-white border border-primary text-primary rounded-xl font-bold text-sm hover:bg-primary-light transition-all"
+        >
+          <Download className="w-4 h-4" />
+          HWPX
         </button>
 
         {/* 인쇄 */}
