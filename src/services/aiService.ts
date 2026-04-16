@@ -1,5 +1,6 @@
 import { Student, AnnualPlanData, MonthlyJournalData } from "../types";
 import { GoogleGenAI } from "@google/genai";
+import { calculateStudentAge } from "./dateUtils";
 
 const apiKey = process.env.GEMINI_API_KEY;
 if (!apiKey) {
@@ -48,21 +49,25 @@ function safeJsonParse(text: string) {
 }
 
 export async function generateAnnualPlan(student: Student): Promise<AnnualPlanData> {
-  if (!apiKey) throw new Error('API Key is missing');
   try {
+    const { manAge, schoolStage } = calculateStudentAge(student.birthDate);
     const prompt = `
       너는 10년 차 1급 전문 언어재활사 및 미술치료사이다. 다음 학생의 정보를 바탕으로 교육청 제출용 '연간 계획서'를 작성해라.
       
       [학생 정보]
       - 이름: ${student.name}
-      - 소속: ${student.school}
+      - 나이: 만 ${manAge}세 (${schoolStage})
       - 장애 유형: ${student.disabilityType}
       - 치료 영역: ${student.treatmentArea}
+      - 주요 관찰 내용: ${student.observations || '없음'}
       
       [시스템 지침]
       1. 핵심 임무: 학생의 정보를 바탕으로 공식 문서에 들어갈 '현행 수준', '장기 목표', '월별 치료 목표 및 내용'을 창작한다.
-      2. 문체 및 어조: 주관적인 감정 표현은 철저히 배제하고, 객관적이고 임상적인 행동 관찰 위주로 서술한다.
-      3. 종결어미: 모든 문장의 끝은 반드시 "-함", "-보임", "-관찰됨", "-향상됨", "-강화됨" 형태의 명사형으로 끝맺는다.
+      2. 맞춤형 난이도 조절 (필수): 
+         - 이 학생은 만 ${manAge}세의 ${student.disabilityType} 아동이며, 진행할 치료 영역은 ${student.treatmentArea}이다. 
+         - 서류의 치료 목표와 프로그램 내용은 반드시 이 나이대 아동의 정상 발달 수준과 ${student.treatmentArea}의 임상적 특성에 완벽하게 부합하도록 구성하라.
+         - 예: 7세 아동의 미술치료라면 '감정표현과 소근육 발달' 위주로, 13세 아동의 언어치료라면 '상황에 맞는 화용 언어 및 복잡한 어휘 구사' 위주로 난이도를 자동 조정할 것.
+      3. 문체 및 어조: 객관적이고 임상적인 행동 관찰 위주로 서술하며, 모든 문장은 "-함", "-보임", "-관찰됨" 등 명사형으로 끝맺는다.
       4. 전문성: 전문가 수준의 단어와 문장 구조를 사용한다.
       
       [응답 구조]
@@ -98,26 +103,29 @@ export async function generateMonthlyJournal(student: Student, month: number, mo
   const effectiveGoal = monthlyGoal || "연간계획서에 목표가 설정되지 않았습니다.";
   
   try {
+    const { manAge, schoolStage } = calculateStudentAge(student.birthDate);
     const prompt = `
       너는 10년 차 1급 전문 언어재활사 및 미술치료사이다. 전달받은 '월 치료 목표'를 바탕으로 아래의 [차윤우 월간일지 샘플]과 완벽하게 동일한 문장 구조, 어조, 명사형 종결어미를 사용하여 치료 내용과 아동 반응을 창작해라.
       
       [학생 정보]
       - 이름: ${student.name}
+      - 나이: 만 ${manAge}세 (${schoolStage})
       - 장애 유형: ${student.disabilityType}
       - 치료 영역: ${student.treatmentArea}
+      - 주요 관찰 내용: ${student.observations || '없음'}
       - 결제 일자(세션 날짜): ${student.paymentDates.join(", ")}
       - 이번 달 치료 목표: ${effectiveGoal}
       
       [시스템 지침]
       1. 핵심 임무: 학생의 정보를 바탕으로 공식 문서에 들어갈 '치료 내용', '아동 반응', '월 치료 목표'를 창작한다.
-      2. 컨텍스트 매핑 및 다양성 (절대 규칙): 
-         - 반드시 전달받은 '이번 달 치료 목표(${effectiveGoal})'를 직접적으로 지원하는 **임상적으로 타당한** 중재 활동을 작성해라.
-         - **내용의 다양성**: 매 회기마다 단순히 "향상됨"만 반복하지 말고, 치료의 단계(도입-심화-일반화)나 아동의 상태 변화(탐색, 시도, 저항, 수용, 숙달)를 다채롭게 묘사해라.
-         - **구체적 기법**: 촉구(Prompting), 모델링(Modeling), 비계 설정(Scaffolding), 용암법(Fading) 등 전문적인 치료 기법을 구체적으로 언급해라.
-         - **세밀한 관찰**: 아동의 비언어적 반응(시선 접촉, 자세, 음성 톤)이나 과제 수행 시의 태도 변화를 세밀하게 포함해라.
-      3. 전문성 및 어조: 10년 차 전문가로서의 임상적 식견이 드러나는 전문 용어를 사용하고, 주관적 감정은 배제한 채 객관적 사실 위주로 서술한다.
-      4. 종결어미: 반드시 "-해봄.", "-표현함.", "-시도함.", "-모습보임.", "-관찰됨.", "-나타남.", "-유지됨." 등 명사형으로 끝맺는다.
-      5. 데이터 기반 매핑: 제공된 '결제 일자' 각 행마다 빈칸 없이 전문적인 내용을 작성한다.
+      2. 맞춤형 난이도 조절 (필수): 
+         - 이 학생은 만 ${manAge}세의 ${student.disabilityType} 아동이며, 진행할 치료 영역은 ${student.treatmentArea}이다. 
+         - 모든 치료 내용과 반응은 반드시 이 나이대 아동의 정상 발달 수준과 ${student.treatmentArea}의 임상적 특성에 완벽하게 부합하도록 구성하라.
+         - 연령별 발달 과업에 맞춰 활동의 구체성과 난이도를 자동 조정할 것.
+      3. 컨텍스트 매핑 및 다양성: 
+         - 반드시 '이번 달 치료 목표(${effectiveGoal})'를 직접적으로 지원하는 임상적으로 타당한 중재 활동을 작성해라.
+         - 매 회기마다 단순 반복적인 표현을 피하고, 치료 단계별 변화를 구체적 기법(Scaffolding, Modeling 등)과 함께 묘사해라.
+      4. 전문성 및 어조: 10년 차 전문가의 식견이 드러나는 명사형 종결어미(-표현함., -관찰됨. 등)를 사용한다.
       
       [논리적 일치 예시 (Few-shot)]
       - 목표가 "정서 표현의 다양화"인 경우:

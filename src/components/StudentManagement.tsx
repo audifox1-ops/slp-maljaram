@@ -21,7 +21,8 @@ export const StudentManagement: React.FC<Props> = ({ studentInfos, onAdd, onUpda
     school: '',
     disabilityType: '',
     treatmentArea: '언어치료',
-    therapistName: ''
+    therapistName: '',
+    observations: ''
   });
 
   const filteredInfos = studentInfos.filter(info => 
@@ -46,7 +47,8 @@ export const StudentManagement: React.FC<Props> = ({ studentInfos, onAdd, onUpda
       school: '',
       disabilityType: '',
       treatmentArea: '언어치료',
-      therapistName: ''
+      therapistName: '',
+      observations: ''
     });
   };
 
@@ -65,7 +67,8 @@ export const StudentManagement: React.FC<Props> = ({ studentInfos, onAdd, onUpda
       school: '',
       disabilityType: '',
       treatmentArea: '언어치료',
-      therapistName: ''
+      therapistName: '',
+      observations: ''
     });
   };
 
@@ -158,6 +161,11 @@ export const StudentManagement: React.FC<Props> = ({ studentInfos, onAdd, onUpda
                         <span className="text-text-muted">담당 치료사</span>
                         <span className="font-bold text-primary">{info.therapistName}</span>
                       </div>
+                      {info.observations && (
+                        <div className="mt-2 text-[10px] text-text-muted bg-bg-theme/50 p-2 rounded-lg line-clamp-2 italic">
+                          "{info.observations}"
+                        </div>
+                      )}
                     </div>
                   </motion.div>
                 ))}
@@ -246,14 +254,20 @@ export const StudentManagement: React.FC<Props> = ({ studentInfos, onAdd, onUpda
 
                 <div className="space-y-2">
                   <label className="text-xs font-bold text-text-muted ml-1 uppercase tracking-wider">장애 유형</label>
-                  <input
+                  <select
                     required
-                    type="text"
-                    value={formData.disabilityType}
+                    value={formData.disabilityType || ""}
                     onChange={(e) => setFormData({ ...formData, disabilityType: e.target.value })}
-                    placeholder="예: 자폐성장애, 지적장애"
-                    className="w-full px-4 py-3 bg-bg-theme border border-border-theme rounded-2xl focus:border-primary outline-none transition-all font-medium"
-                  />
+                    className="w-full px-4 py-3 bg-bg-theme border border-border-theme rounded-2xl focus:border-primary outline-none transition-all font-medium cursor-pointer"
+                  >
+                    <option value="" disabled>장애 유형 선택</option>
+                    <option value="지적장애">지적장애</option>
+                    <option value="자폐성장애">자폐성장애</option>
+                    <option value="언어장애">언어장애</option>
+                    <option value="발달장애">발달장애</option>
+                    <option value="경계선지능">경계선지능</option>
+                    <option value="기타">기타</option>
+                  </select>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
@@ -282,6 +296,16 @@ export const StudentManagement: React.FC<Props> = ({ studentInfos, onAdd, onUpda
                       className="w-full px-4 py-3 bg-bg-theme border border-border-theme rounded-2xl focus:border-primary outline-none transition-all font-medium"
                     />
                   </div>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-xs font-bold text-text-muted ml-1 uppercase tracking-wider">주요 관찰 내용 및 특이사항 (선택)</label>
+                  <textarea
+                    value={formData.observations || ''}
+                    onChange={(e) => setFormData({ ...formData, observations: e.target.value })}
+                    placeholder="예: 지시 따르기 양호함, 소근육 발달이 다소 늦음, 상호작용 의도는 있으나 방식이 미숙함 등"
+                    className="w-full px-4 py-3 bg-bg-theme border border-border-theme rounded-2xl focus:border-primary outline-none transition-all font-medium min-h-[100px] resize-none"
+                  />
                 </div>
 
                 <div className="pt-4 flex gap-3">

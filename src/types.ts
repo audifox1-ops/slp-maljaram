@@ -5,6 +5,7 @@ export interface StudentInfo {
   disabilityType: string;
   treatmentArea: string;
   therapistName: string;
+  observations?: string;
 }
 
 export interface Student {
@@ -23,6 +24,7 @@ export interface Student {
   therapistName: string;
   voucherArea?: string;
   paymentDates: string[]; // List of dates for the monthly journal
+  observations?: string;
 }
 
 export interface AnnualPlanData {
