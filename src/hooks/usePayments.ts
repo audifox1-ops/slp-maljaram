@@ -35,10 +35,12 @@ export function usePayments(
 
   // Firestore 실시간 구독
   useEffect(() => {
+    console.log('[FIREBASE_DEBUG] Subscribing to payment_records collection...');
     const q = collection(db, 'payment_records');
     const unsub = onSnapshot(
       q,
       (snapshot) => {
+        console.log(`[FIREBASE_DEBUG] Received payments snapshot: ${snapshot.docs.length} docs`);
         const records = snapshot.docs.map(
           (d) => ({ id: d.id, ...d.data() } as PaymentRecord)
         );
@@ -59,7 +61,7 @@ export function usePayments(
         }
       },
       (err) => {
-        console.error(err);
+        console.error('[FIREBASE_DEBUG] Payments subscription error:', err);
         showToast({ type: 'error', message: '결제 내역을 불러오는데 실패했습니다.' }, 3000);
       }
     );

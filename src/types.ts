@@ -61,6 +61,15 @@ export interface RawRecord {
   [key: string]: any;
 }
 
+export interface PaymentRecord {
+  id: string;
+  studentName: string;
+  transactionDate: string;
+  amount: string | number;
+  treatmentArea: string;
+  createdAt?: any;
+}
+
 export interface UploadStatus {
   type: 'success' | 'error';
   message: string;

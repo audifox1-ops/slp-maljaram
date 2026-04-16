@@ -2,17 +2,29 @@ import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 
-// 환경 변수에서 구성을 읽어오되, 누락 시 실제 데이터가 있는 프로젝트(gen-lang-client-0159907695)를 기본값으로 사용합니다.
+// 환경 변수 설정
+const ENV_PROJECT_ID = import.meta.env.VITE_FIREBASE_PROJECT_ID;
+const ENV_DATABASE_ID = import.meta.env.VITE_FIREBASE_DATABASE_ID;
+
+// "slp-docs"는 프로젝트 이름일 뿐 데이터베이스 ID로는 부적절하므로 배제합니다.
+const isInvalidDbId = (id: string | undefined) => !id || id === 'slp-docs' || id === '';
+
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "AIzaSyAPc36awDxHcFuzQTW_sNvbvJTliF48acQ",
   authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "gen-lang-client-0159907695.firebaseapp.com",
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "gen-lang-client-0159907695",
+  projectId: (ENV_PROJECT_ID && ENV_PROJECT_ID !== 'slp-docs') ? ENV_PROJECT_ID : "gen-lang-client-0159907695",
   storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || "gen-lang-client-0159907695.firebasestorage.app",
   messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "420938473723",
   appId: import.meta.env.VITE_FIREBASE_APP_ID || "1:420938473723:web:41a59d5b4fa8e77696505e",
   measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID || "",
-  firestoreDatabaseId: import.meta.env.VITE_FIREBASE_DATABASE_ID || "ai-studio-f6c3d59c-c8ab-4ba0-973b-32245977679a",
+  firestoreDatabaseId: isInvalidDbId(ENV_DATABASE_ID) ? "(default)" : ENV_DATABASE_ID,
 };
+
+console.log('[FIREBASE_DEBUG] Initializing with:', {
+  projectId: firebaseConfig.projectId,
+  databaseId: firebaseConfig.firestoreDatabaseId,
+  isProd: import.meta.env.PROD
+});
 
 const app = initializeApp(firebaseConfig);
 export const db = getFirestore(app, firebaseConfig.firestoreDatabaseId || '(default)');
