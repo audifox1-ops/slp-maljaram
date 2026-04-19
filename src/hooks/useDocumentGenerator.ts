@@ -22,6 +22,8 @@ interface UseDocumentGeneratorReturn {
   generateBatchInRange: (student: Student, startMonth: number, endMonth: number, progressCallback?: (month: number) => void) => Promise<void>;
   saveAnnualData: (student: Student, data: AnnualPlanData) => Promise<void>;
   saveMonthlyData: (student: Student, data: MonthlyJournalData) => Promise<void>;
+  regenerateAnnualData: (student: Student) => Promise<void>;
+  regenerateMonthlyData: (student: Student) => Promise<void>;
 }
 
 export function useDocumentGenerator(
@@ -367,6 +369,91 @@ export function useDocumentGenerator(
     [selectedYear, selectedMonth, annualData, getAnnualPlan, getMonthlyJournal, saveAnnualPlan, saveMonthlyJournal, showToast]
   );
 
+  const regenerateAnnualData = useCallback(
+    async (student: Student) => {
+      setIsLoading(true);
+      try {
+        const annual = await generateAnnualPlan(student);
+        await saveAnnualPlan(student.name, selectedYear, annual);
+        setAnnualData(annual);
+        showToast({ type: 'success', message: '연간 계획서가 새로 작성되었습니다.' });
+      } catch (error: any) {
+        let fallback = generateFallbackAnnualPlan();
+        await saveAnnualPlan(student.name, selectedYear, fallback);
+        setAnnualData(fallback);
+        if (error.message === 'API_KEY_MISSING') {
+          showToast({ type: 'success', message: '새 연간 계획서(Mock)가 생성되었습니다.' });
+        } else {
+          showToast({ type: 'success', message: '데이터 생성에 실패하여 기본 양식으로 생성되었습니다.' });
+        }
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [selectedYear, saveAnnualPlan, showToast]
+  );
+
+  const regenerateMonthlyData = useCallback(
+    async (student: Student) => {
+      setIsLoading(true);
+      try {
+        const currentAnnual = annualData || await getAnnualPlan(student.name, selectedYear) || generateFallbackAnnualPlan();
+        const monthlyGoal = currentAnnual.monthlyGoals.find((g) => g.month === selectedMonth)?.goal || '목표 미설정';
+        
+        const filteredDates = filterDatesByYearMonth(student.paymentDates, selectedYear, selectedMonth);
+        const studentWithDates = { ...student, paymentDates: filteredDates };
+        
+        let monthly: MonthlyJournalData;
+        if (filteredDates.length > 0) {
+          monthly = await generateMonthlyJournal(studentWithDates, selectedMonth, monthlyGoal);
+        } else {
+          monthly = {
+            currentLevel: '현재 치료 목표에 따른 활동을 수행 중임.',
+            monthlyGoal,
+            sessions: generateMockSessions(
+              [1, 8, 15, 22].map(d => `${selectedYear}-${String(selectedMonth).padStart(2, '0')}-${String(d).padStart(2, '0')}`),
+              student.treatmentArea,
+              monthlyGoal
+            ),
+            result: '긍정적인 변화가 관찰되며 지속적인 지도가 필요함.',
+          };
+        }
+        
+        await saveMonthlyJournal(student.name, selectedYear, selectedMonth, monthly);
+        setMonthlyData(monthly);
+        showToast({ type: 'success', message: `${selectedMonth}월 일지가 새로 작성되었습니다.` });
+      } catch (error: any) {
+        // Fallback
+        const currentAnnual = annualData || generateFallbackAnnualPlan();
+        const monthlyGoal = currentAnnual.monthlyGoals.find((g) => g.month === selectedMonth)?.goal || '목표 미설정';
+        const filteredDates = filterDatesByYearMonth(student.paymentDates, selectedYear, selectedMonth);
+        
+        const fallbackMonthly: MonthlyJournalData = {
+          currentLevel: '현재 치료 목표에 따른 활동을 수행 중임.',
+          monthlyGoal,
+          sessions: generateMockSessions(
+            filteredDates.length > 0 ? filteredDates : [1, 8, 15, 22].map(d => `${selectedYear}-${String(selectedMonth).padStart(2, '0')}-${String(d).padStart(2, '0')}`),
+            student.treatmentArea,
+            monthlyGoal
+          ),
+          result: '긍정적인 변화가 관찰되며 지속적인 지도가 필요함.',
+        };
+        
+        await saveMonthlyJournal(student.name, selectedYear, selectedMonth, fallbackMonthly);
+        setMonthlyData(fallbackMonthly);
+        
+        if (error.message === 'API_KEY_MISSING') {
+          showToast({ type: 'success', message: `새 ${selectedMonth}월 일지(Mock)가 생성되었습니다.` });
+        } else {
+          showToast({ type: 'success', message: 'AI 생성에 실패하여 기본 양식으로 생성되었습니다.' });
+        }
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [selectedYear, selectedMonth, annualData, getAnnualPlan, saveMonthlyJournal, showToast]
+  );
+
   return {
     annualData,
     monthlyData,
@@ -376,5 +463,7 @@ export function useDocumentGenerator(
     generateBatchInRange,
     saveAnnualData,
     saveMonthlyData,
+    regenerateAnnualData,
+    regenerateMonthlyData,
   };
 }

@@ -1,17 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { Edit2, Save, X } from 'lucide-react';
+import { Edit2, Save, X, FileDown, RefreshCw } from 'lucide-react';
 import { Student, AnnualPlanData } from '../types';
 import { downloadAnnualPlanAsHWPX } from '../services/hwpxExportService';
-import { FileDown } from 'lucide-react';
 
 interface Props {
   student: Student;
   data: AnnualPlanData;
   year: number;
   onSave?: (newData: AnnualPlanData) => void;
+  onRegenerate?: () => void;
 }
 
-export const AnnualPlan: React.FC<Props> = ({ student, data, year, onSave }) => {
+export const AnnualPlan: React.FC<Props> = ({ student, data, year, onSave, onRegenerate }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editedData, setEditedData] = useState<AnnualPlanData>(data);
 
@@ -81,6 +81,20 @@ export const AnnualPlan: React.FC<Props> = ({ student, data, year, onSave }) => 
           <FileDown className="w-3.5 h-3.5" />
           HWPX
         </button>
+        {onRegenerate && !isEditing && (
+          <button
+            onClick={() => {
+              if (window.confirm('기존 데이터가 삭제되고 새로 작성됩니다. 계속하시겠습니까?')) {
+                onRegenerate();
+              }
+            }}
+            className="flex items-center gap-1 px-3 py-1.5 bg-orange-50 text-orange-600 rounded-lg hover:bg-orange-100 transition-colors text-sm font-bold border border-orange-200"
+            title="연간 계획서 새로 작성"
+          >
+            <RefreshCw className="w-3.5 h-3.5" />
+            재작성
+          </button>
+        )}
       </div>
 
       {/* Header Section */}

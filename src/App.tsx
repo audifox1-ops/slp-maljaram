@@ -87,6 +87,8 @@ export default function App() {
     generateBatchInRange,
     saveAnnualData,
     saveMonthlyData,
+    regenerateAnnualData,
+    regenerateMonthlyData,
   } = useDocumentGenerator(selectedYear, selectedMonth);
 
   // ─── 학생 목록 (결제 내역 + 등록된 학생 통합) ───
@@ -455,6 +457,8 @@ export default function App() {
                       selectedMonth={selectedMonth}
                       onSaveAnnual={(data) => selectedStudent && saveAnnualData(selectedStudent, data)}
                       onSaveMonthly={(data) => selectedStudent && saveMonthlyData(selectedStudent, data)}
+                      onRegenerateAnnual={() => selectedStudent && regenerateAnnualData(selectedStudent)}
+                      onRegenerateMonthly={() => selectedStudent && regenerateMonthlyData(selectedStudent)}
                     />
                   </motion.div>
                 ) : (

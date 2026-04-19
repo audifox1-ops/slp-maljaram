@@ -20,6 +20,8 @@ interface DocumentPreviewProps {
   selectedMonth: number;
   onSaveAnnual?: (data: AnnualPlanData) => void;
   onSaveMonthly?: (data: MonthlyJournalData) => void;
+  onRegenerateAnnual?: () => void;
+  onRegenerateMonthly?: () => void;
 }
 
 export const DocumentPreview: React.FC<DocumentPreviewProps> = ({
@@ -32,6 +34,8 @@ export const DocumentPreview: React.FC<DocumentPreviewProps> = ({
   selectedMonth,
   onSaveAnnual,
   onSaveMonthly,
+  onRegenerateAnnual,
+  onRegenerateMonthly,
 }) => {
   // 학생 미선택 상태
   if (!selectedStudent) {
@@ -78,6 +82,7 @@ export const DocumentPreview: React.FC<DocumentPreviewProps> = ({
                 data={annualData}
                 year={selectedYear}
                 onSave={onSaveAnnual}
+                onRegenerate={onRegenerateAnnual}
               />
             ) : activeTab === 'monthly' &&
               monthlyData &&
@@ -88,6 +93,7 @@ export const DocumentPreview: React.FC<DocumentPreviewProps> = ({
                 month={selectedMonth}
                 year={selectedYear}
                 onSave={onSaveMonthly}
+                onRegenerate={onRegenerateMonthly}
               />
             ) : (
               <div className="flex flex-col items-center justify-center h-full py-20 text-text-muted opacity-50">
