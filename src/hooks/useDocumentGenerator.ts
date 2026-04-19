@@ -96,12 +96,15 @@ export function useDocumentGenerator(
                 };
               }
             }
-          } catch (aiError) {
-            console.warn('AI generation failed, using mock data:', aiError);
-            showToast({
-              type: 'error',
-              message: 'AI 생성에 실패하여 기본 양식(Mock)으로 대체되었습니다.',
-            }, 4000);
+          } catch (aiError: any) {
+            // API 키가 없는 경우에는 의도된 상황이므로 콘솔 경고를 억제합니다.
+            if (aiError.message !== 'API_KEY_MISSING') {
+              console.warn('AI generation failed, using mock data:', aiError);
+              showToast({
+                type: 'error',
+                message: 'AI 생성에 실패하여 기본 양식(Mock)으로 대체되었습니다.',
+              }, 4000);
+            }
             
             if (!annual) annual = generateFallbackAnnualPlan();
 
@@ -206,12 +209,26 @@ export function useDocumentGenerator(
           message:
             '가상 일지가 생성되었습니다. (결제 내역이 없는 경우 임시로 생성됨)',
         });
-      } catch (error) {
-        console.error('Draft generation failed:', error);
-        showToast({
-          type: 'error',
-          message: '가상 일지 생성 중 오류가 발생했습니다.',
-        });
+      } catch (error: any) {
+        if (error.message === 'API_KEY_MISSING') {
+          // 가상 일지 생성 시 키가 없으면 Mock 데이터로 즉시 생성
+          const virtualDates = [];
+          for (let i = 1; i <= 4; i++) {
+            const day = 7 * i - 3;
+            virtualDates.push(`${selectedYear}-${String(selectedMonth).padStart(2, '0')}-${String(day).padStart(2, '0')}`);
+          }
+          const monthly = {
+            currentLevel: '가상 치료 세션을 통한 초기 평가 진행 중임.',
+            monthlyGoal: '목표 미설정 (가상)',
+            sessions: generateMockSessions(virtualDates, student.treatmentArea, '목표 미설정 (가상)'),
+            result: '가상 데이터를 기반으로 한 분석 결과임.'
+          };
+          setMonthlyData(monthly);
+          showToast({ type: 'success', message: '가상 일지(Mock)가 생성되었습니다.' });
+        } else {
+          console.error('Draft generation failed:', error);
+          showToast({ type: 'error', message: '가상 일지 생성 중 오류가 발생했습니다.' });
+        }
       } finally {
         setIsLoading(false);
       }
@@ -293,17 +310,30 @@ export function useDocumentGenerator(
           const monthlyGoal = currentAnnual.monthlyGoals.find((g) => g.month === m)?.goal || '목표 미설정';
 
           let monthly: MonthlyJournalData;
-          if (filteredDates.length > 0) {
-            const studentWithDates = { ...student, paymentDates: filteredDates };
-            monthly = await generateMonthlyJournal(studentWithDates, m, monthlyGoal);
-          } else {
-            // 결제 내역 없으면 가상 날짜로 생성하거나 Mock 처리 (여기서는 Mock 폴백 패턴 활용)
+          try {
+            if (filteredDates.length > 0) {
+              const studentWithDates = { ...student, paymentDates: filteredDates };
+              monthly = await generateMonthlyJournal(studentWithDates, m, monthlyGoal);
+            } else {
+              // 결제 내역 없으면 가상 날짜로 Mock 처리
+              monthly = {
+                currentLevel: '현재 치료 목표에 따른 활동을 수행 중임.',
+                monthlyGoal,
+                sessions: generateMockSessions(
+                  [1, 8, 15, 22].map(d => `${selectedYear}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`),
+                  student.treatmentArea,
+                  monthlyGoal
+                ),
+                result: '긍정적인 변화가 관찰되며 지속적인 지도가 필요함.',
+              };
+            }
+          } catch (aiError: any) {
+            // API 키가 없거나 기타 에러 발생 시 Mock으로 폴백 (배치 모드에서는 조용히 처리)
             monthly = {
               currentLevel: '현재 치료 목표에 따른 활동을 수행 중임.',
               monthlyGoal,
               sessions: generateMockSessions(
-                // 임시로 해당 월의 1, 8, 15, 22일 생성
-                [1, 8, 15, 22].map(d => `${selectedYear}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`),
+                filteredDates.length > 0 ? filteredDates : [1, 8, 15, 22].map(d => `${selectedYear}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`),
                 student.treatmentArea,
                 monthlyGoal
               ),

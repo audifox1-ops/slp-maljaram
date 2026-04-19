@@ -50,6 +50,7 @@ function safeJsonParse(text: string) {
 }
 
 export async function generateAnnualPlan(student: Student): Promise<AnnualPlanData> {
+  if (!apiKey) throw new Error('API_KEY_MISSING');
   try {
     const { manAge, schoolStage } = calculateStudentAge(student.birthDate);
     const prompt = `
@@ -98,7 +99,7 @@ export async function generateAnnualPlan(student: Student): Promise<AnnualPlanDa
 }
 
 export async function generateMonthlyJournal(student: Student, month: number, monthlyGoal?: string): Promise<MonthlyJournalData> {
-  if (!apiKey) throw new Error('API Key is missing');
+  if (!apiKey) throw new Error('API_KEY_MISSING');
   const effectiveGoal = monthlyGoal || "연간계획서에 목표가 설정되지 않았습니다.";
   
   try {
