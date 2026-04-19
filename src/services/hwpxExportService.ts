@@ -35,12 +35,12 @@ export async function downloadAnnualPlanAsHWPX(
       '{{STUDENT_NAME}}': student.name,
       '{{BIRTH_DATE}}': student.birthDate,
       '{{SCHOOL}}': student.school,
-      '{{DISABILITY_TYPE}}': student.disabilityType,
+      '{{DISABILITY_TYPE}}': student.disabilityType || '',
       '{{TREATMENT_AREA}}': student.treatmentArea,
       '{{THERAPIST_NAME}}': student.therapistName,
       '{{SCHEDULE}}': `요일: ${student.schedule.day} / 시간: ${student.schedule.time}`,
-      '{{CURRENT_LEVEL}}': formatForHwpx(data.currentLevel.join('\n')),
-      '{{LONG_TERM_GOAL}}': formatForHwpx(data.longTermGoals.join('\n')),
+      '{{CURRENT_LEVEL}}': data.currentLevel.join('\n'),
+      '{{LONG_TERM_GOAL}}': data.longTermGoals.join('\n'),
     };
 
     // 월별 목표 치환
@@ -52,7 +52,7 @@ export async function downloadAnnualPlanAsHWPX(
 
     // XML 치환 수행
     Object.entries(replacements).forEach(([key, value]) => {
-      sectionXml = sectionXml!.split(key).join(escapeXml(value));
+      sectionXml = sectionXml!.split(key).join(formatForHwpx(value));
     });
 
     // 수정된 XML을 다시 ZIP에 저장
@@ -99,28 +99,28 @@ export async function downloadMonthlyJournalAsHWPX(
       '{{STUDENT_NAME}}': student.name,
       '{{BIRTH_DATE}}': student.birthDate,
       '{{SCHOOL}}': student.school,
-      '{{DISABILITY_TYPE}}': student.disabilityType,
+      '{{DISABILITY_TYPE}}': student.disabilityType || '',
       '{{TREATMENT_AREA}}': student.treatmentArea,
       '{{THERAPIST_NAME}}': student.therapistName,
       '{{SCHEDULE_DAY}}': student.schedule.day,
       '{{SCHEDULE_TIME}}': student.schedule.time,
-      '{{CURRENT_LEVEL}}': formatForHwpx(data.currentLevel),
-      '{{MONTHLY_GOAL}}': formatForHwpx(data.monthlyGoal),
-      '{{RESULT}}': formatForHwpx(data.result),
+      '{{CURRENT_LEVEL}}': data.currentLevel,
+      '{{MONTHLY_GOAL}}': data.monthlyGoal,
+      '{{RESULT}}': data.result,
     };
 
     // 회기별 데이터 치환
     data.sessions.forEach((session, index) => {
       const sNum = index + 1;
       replacements[`{{S${sNum}_DATE}}`] = session.date;
-      replacements[`{{S${sNum}_CONTENT}}`] = formatForHwpx(session.content);
-      replacements[`{{S${sNum}_REACTION}}`] = formatForHwpx(session.reaction);
-      replacements[`{{S${sNum}_NOTE}}`] = formatForHwpx(session.consultation);
+      replacements[`{{S${sNum}_CONTENT}}`] = session.content;
+      replacements[`{{S${sNum}_REACTION}}`] = session.reaction;
+      replacements[`{{S${sNum}_NOTE}}`] = session.consultation;
     });
 
     // XML 치환 수행
     Object.entries(replacements).forEach(([key, value]) => {
-      sectionXml = sectionXml!.split(key).join(escapeXml(value));
+      sectionXml = sectionXml!.split(key).join(formatForHwpx(value));
     });
 
     zip.file(sectionXmlPath, sectionXml);
@@ -135,11 +135,13 @@ export async function downloadMonthlyJournalAsHWPX(
 }
 
 /**
- * XML 특수문자 이스케이프
+ * XML 특수문자 이스케이프 및 HWPX 줄바꿈 처리
  */
-function escapeXml(unsafe: string): string {
-  if (!unsafe) return '';
-  return unsafe.replace(/[<>&"']/g, (c) => {
+function formatForHwpx(text: string): string {
+  if (!text) return '';
+  
+  // 1. 먼저 XML 특수문자 이스케이프
+  const escaped = text.replace(/[<>&"']/g, (c) => {
     switch (c) {
       case '<': return '&lt;';
       case '>': return '&gt;';
@@ -149,16 +151,8 @@ function escapeXml(unsafe: string): string {
       default: return c;
     }
   });
-}
 
-/**
- * HWPX 내에서 줄바꿈 처리를 위해 \n을 <hp:br/> 태그로 변환(또는 유사 처리)하려 할 수 있으나
- * 단순 text node 치환의 경우 \n이 무시될 수 있습니다.
- * 상황에 따라 템플릿의 <hp:p> 태그 구조를 건드려야 할 수도 있지만, 
- * 여기서는 단순 이스케이프와 기본 포맷팅만 유지합니다.
- */
-function formatForHwpx(text: string): string {
-  if (!text) return '';
-  // 필요 시 HWPX 전용 줄바꿈 태그 등으로 치환 로직 추가 가능
-  return text;
+  // 2. 줄바꿈(\n)을 HWPX의 <hp:br/> 태그로 변환
+  // 템플릿의 <hp:t> 태그 내에 삽입될 것을 가정하므로, 태그를 닫고 줄바꿈 후 다시 엽니다.
+  return escaped.split('\n').join('</hp:t><hp:br/><hp:t>');
 }

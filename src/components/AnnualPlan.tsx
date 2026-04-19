@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Edit2, Save, X } from 'lucide-react';
 import { Student, AnnualPlanData } from '../types';
+import { downloadAnnualPlanAsHWPX } from '../services/hwpxExportService';
+import { FileDown } from 'lucide-react';
 
 interface Props {
   student: Student;
@@ -71,6 +73,14 @@ export const AnnualPlan: React.FC<Props> = ({ student, data, year, onSave }) => 
             </button>
           </>
         )}
+        <button
+          onClick={() => downloadAnnualPlanAsHWPX(student, editedData, year)}
+          className="flex items-center gap-1 px-3 py-1.5 bg-indigo-50 text-indigo-600 rounded-lg hover:bg-indigo-100 transition-colors text-sm font-bold border border-indigo-200"
+          title="한글(HWPX) 파일로 다운로드"
+        >
+          <FileDown className="w-3.5 h-3.5" />
+          HWPX
+        </button>
       </div>
 
       {/* Header Section */}
