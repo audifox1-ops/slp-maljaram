@@ -2,9 +2,10 @@ import { Student, AnnualPlanData, MonthlyJournalData } from "../types";
 import { GoogleGenAI } from "@google/genai";
 import { calculateStudentAge } from "./dateUtils";
 
-const apiKey = process.env.GEMINI_API_KEY;
+const apiKey = (import.meta as any).env?.VITE_GEMINI_API_KEY;
 if (!apiKey) {
-  console.warn("Warning: GEMINI_API_KEY is not set. AI features might fail.");
+  // Suppress intrusive warnings in production if possible, keep it subtle
+  console.log("%c[AI Service] GEMINI_API_KEY is not set. Using fallback mock data.", "color: #6366f1; font-weight: bold;");
 }
 const ai = new GoogleGenAI({ apiKey: apiKey || '' });
 
@@ -91,7 +92,7 @@ export async function generateAnnualPlan(student: Student): Promise<AnnualPlanDa
     if (!response.text) throw new Error('Empty response from AI');
     return safeJsonParse(response.text);
   } catch (error) {
-    console.error("AI Error:", error);
+    if (apiKey) console.error("AI Error:", error);
     throw error;
   }
 }
@@ -153,7 +154,7 @@ export async function generateMonthlyJournal(student: Student, month: number, mo
     if (!response.text) throw new Error('Empty response from AI');
     return safeJsonParse(response.text);
   } catch (error) {
-    console.error("AI Error:", error);
+    if (apiKey) console.error("AI Error:", error);
     throw error;
   }
 }

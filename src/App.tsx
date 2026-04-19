@@ -221,17 +221,16 @@ export default function App() {
           ${styles}
           <style>
             @media print {
+              @page { margin: 0; }
               body { 
                 margin: 0 !important; 
-                padding: 0 !important; 
+                padding: 15mm 12mm !important; 
                 background: white !important;
+                -webkit-print-color-adjust: exact;
               }
               .no-print { display: none !important; }
               .document-container {
-                width: 210mm !important;
-                min-height: 297mm !important;
-                padding: 15mm 12mm !important;
-                margin: 0 auto !important;
+                width: 100% !important;
                 box-shadow: none !important;
                 border: none !important;
                 box-sizing: border-box !important;
