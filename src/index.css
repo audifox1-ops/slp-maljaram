@@ -59,6 +59,8 @@
       margin-top: 1.5em !important;
       margin-bottom: 0.5em !important;
       page-break-after: avoid;
+      word-break: keep-all !important;
+      overflow-wrap: break-word !important;
     }
     /* 테이블 스타일 강제 적용 */
     table {
@@ -146,6 +148,12 @@
 
 body {
   @apply bg-bg-theme text-text-main font-sans antialiased;
+  word-break: keep-all;
+}
+
+.break-keep {
+  word-break: keep-all;
+  overflow-wrap: break-word;
 }
 
 /* Custom Scrollbar */

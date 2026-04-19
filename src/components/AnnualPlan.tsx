@@ -84,23 +84,27 @@ export const AnnualPlan: React.FC<Props> = ({ student, data, year, onSave }) => 
       </div>
 
       {/* Header Section */}
-      <div className="flex justify-between items-start mb-6 pt-4">
-        <div className="flex-1 text-center pt-6">
-          <h2 className="text-2xl font-bold tracking-[1px]">{year}. 교육청 치료지원 대상 연간 계획서</h2>
+      <div className="grid grid-cols-[1fr_auto] items-start mb-6 pt-4 gap-4">
+        <div className="text-center pt-6 min-w-0">
+          <h2 className="text-2xl font-bold tracking-[1px] break-keep leading-tight">
+            {year}. 교육청 치료지원 대상 연간 계획서
+          </h2>
         </div>
-        <table className="border-collapse border border-black text-[0.7rem] w-32">
-          <tbody>
-            <tr>
-              <td rowSpan={2} className="border border-black p-1 text-center bg-slate-50 w-6">결<br/>재</td>
-              <td className="border border-black p-1 text-center bg-slate-50">기관장</td>
-              <td className="border border-black p-1 text-center bg-slate-50">치료사</td>
-            </tr>
-            <tr>
-              <td className="border border-black h-12"></td>
-              <td className="border border-black h-12"></td>
-            </tr>
-          </tbody>
-        </table>
+        <div className="flex-none">
+          <table className="border-collapse border border-black text-[0.7rem] w-32 ml-auto">
+            <tbody>
+              <tr>
+                <td rowSpan={2} className="border border-black p-1 text-center bg-slate-50 w-6">결<br/>재</td>
+                <td className="border border-black p-1 text-center bg-slate-50">기관장</td>
+                <td className="border border-black p-1 text-center bg-slate-50">치료사</td>
+              </tr>
+              <tr>
+                <td className="border border-black h-12"></td>
+                <td className="border border-black h-12"></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
 
       {/* Basic Info Table */}

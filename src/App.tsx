@@ -221,23 +221,35 @@ export default function App() {
           ${styles}
           <style>
             @media print {
-              body { margin: 0; padding: 0; }
+              body { 
+                margin: 0 !important; 
+                padding: 0 !important; 
+                background: white !important;
+              }
               .no-print { display: none !important; }
               .document-container {
-                width: 210mm;
-                min-height: 297mm;
-                padding: 15mm !important;
-                margin: 0 auto;
+                width: 210mm !important;
+                min-height: 297mm !important;
+                padding: 15mm 12mm !important;
+                margin: 0 auto !important;
                 box-shadow: none !important;
                 border: none !important;
+                box-sizing: border-box !important;
+                page-break-after: always;
               }
             }
             body {
-              background-color: white;
+              background-color: #f1f5f9;
               margin: 0;
-              padding: 20px;
+              padding: 40px;
               display: flex;
               justify-content: center;
+              font-family: Pretendard, sans-serif;
+            }
+            .print-wrapper {
+              width: 210mm;
+              background-color: white;
+              box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
             }
           </style>
         </head>
