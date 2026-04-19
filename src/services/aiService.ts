@@ -82,7 +82,7 @@ export async function generateAnnualPlan(student: Student): Promise<AnnualPlanDa
     `;
 
     const response = await executeWithTimeout(ai.models.generateContent({
-      model: "gemini-3-flash-preview",
+      model: "gemini-2.0-flash",
       contents: [{ role: "user", parts: [{ text: prompt }] }],
       config: {
         responseMimeType: "application/json",
@@ -144,7 +144,7 @@ export async function generateMonthlyJournal(student: Student, month: number, mo
     `;
 
     const response = await executeWithTimeout(ai.models.generateContent({
-      model: "gemini-3-flash-preview",
+      model: "gemini-2.0-flash",
       contents: [{ role: "user", parts: [{ text: prompt }] }],
       config: {
         responseMimeType: "application/json",
