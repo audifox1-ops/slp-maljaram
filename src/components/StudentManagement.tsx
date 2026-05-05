@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Edit2, Trash2, UserPlus, Save, X, Search, User } from 'lucide-react';
+import { Plus, Edit2, Trash2, UserPlus, Save, X, Search, User, AlertCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { StudentInfo } from '../types';
 
@@ -22,6 +22,7 @@ export const StudentManagement: React.FC<Props> = ({ studentInfos, onAdd, onUpda
     disabilityType: '',
     treatmentArea: '언어치료',
     therapistName: '',
+    schedule: { day: '', time: '', frequency: '1' },
     observations: ''
   });
 
@@ -48,6 +49,7 @@ export const StudentManagement: React.FC<Props> = ({ studentInfos, onAdd, onUpda
       disabilityType: '',
       treatmentArea: '언어치료',
       therapistName: '',
+      schedule: { day: '', time: '', frequency: '1' },
       observations: ''
     });
   };
@@ -159,7 +161,15 @@ export const StudentManagement: React.FC<Props> = ({ studentInfos, onAdd, onUpda
                       </div>
                       <div className="flex justify-between border-t border-slate-50 pt-2 mt-2">
                         <span className="text-text-muted">담당 치료사</span>
-                        <span className="font-bold text-primary">{info.therapistName}</span>
+                        <span className="font-bold text-primary">{info.therapistName || '-'}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-text-muted">치료 일정</span>
+                        <span className="font-semibold text-right">
+                          {info.schedule?.day && info.schedule?.time 
+                            ? `${info.schedule.day} ${info.schedule.time} (${info.schedule.frequency}회)`
+                            : <span className="text-amber-500 flex items-center gap-1 justify-end"><AlertCircle className="w-3 h-3"/>입력 필요</span>}
+                        </span>
                       </div>
                       {info.observations && (
                         <div className="mt-2 text-[10px] text-text-muted bg-bg-theme/50 p-2 rounded-lg line-clamp-2 italic">
@@ -295,6 +305,43 @@ export const StudentManagement: React.FC<Props> = ({ studentInfos, onAdd, onUpda
                       placeholder="치료사 이름"
                       className="w-full px-4 py-3 bg-bg-theme border border-border-theme rounded-2xl focus:border-primary outline-none transition-all font-medium"
                     />
+                  </div>
+                </div>
+
+                {/* 치료 일정 */}
+                <div className="space-y-2">
+                  <label className="text-xs font-bold text-text-muted ml-1 uppercase tracking-wider">치료 일정</label>
+                  <div className="grid grid-cols-3 gap-3">
+                    <div className="space-y-1">
+                      <p className="text-[10px] text-text-muted ml-1">요일</p>
+                      <input
+                        type="text"
+                        value={formData.schedule?.day || ''}
+                        onChange={(e) => setFormData({ ...formData, schedule: { ...(formData.schedule ?? { day: '', time: '', frequency: '1' }), day: e.target.value } })}
+                        placeholder="화, 목"
+                        className="w-full px-3 py-2.5 bg-bg-theme border border-border-theme rounded-xl focus:border-primary outline-none transition-all font-medium text-sm"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-[10px] text-text-muted ml-1">시간</p>
+                      <input
+                        type="text"
+                        value={formData.schedule?.time || ''}
+                        onChange={(e) => setFormData({ ...formData, schedule: { ...(formData.schedule ?? { day: '', time: '', frequency: '1' }), time: e.target.value } })}
+                        placeholder="14:00~14:50"
+                        className="w-full px-3 py-2.5 bg-bg-theme border border-border-theme rounded-xl focus:border-primary outline-none transition-all font-medium text-sm"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-[10px] text-text-muted ml-1">주 횟수</p>
+                      <select
+                        value={formData.schedule?.frequency || '1'}
+                        onChange={(e) => setFormData({ ...formData, schedule: { ...(formData.schedule ?? { day: '', time: '', frequency: '1' }), frequency: e.target.value } })}
+                        className="w-full px-3 py-2.5 bg-bg-theme border border-border-theme rounded-xl focus:border-primary outline-none transition-all font-medium text-sm cursor-pointer"
+                      >
+                        {['1','2','3','4','5'].map(n => <option key={n} value={n}>{n}회</option>)}
+                      </select>
+                    </div>
                   </div>
                 </div>
 

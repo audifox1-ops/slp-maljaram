@@ -28,21 +28,14 @@ export function useStudents(): UseStudentsReturn {
 
   // Firestore 실시간 구독
   useEffect(() => {
-    console.log('[FIREBASE_DEBUG] Subscribing to students collection...');
     const q = collection(db, 'students');
     const unsub = onSnapshot(
       q,
       (snapshot) => {
-        console.log(`[FIREBASE_DEBUG] Received students snapshot: ${snapshot.docs.length} docs`);
-        const infos = snapshot.docs.map((d) => {
-          const data = d.data();
-          console.log(`[FIREBASE_DEBUG] Student doc:`, data);
-          return data as StudentInfo;
-        });
+        const infos = snapshot.docs.map((d) => d.data() as StudentInfo);
         setStudentInfos(infos);
       },
       (err) => {
-        console.error('[FIREBASE_DEBUG] Students subscription error:', err);
         handleFirestoreError(err, OperationType.LIST, 'students');
       }
     );

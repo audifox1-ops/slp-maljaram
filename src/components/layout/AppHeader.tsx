@@ -75,10 +75,14 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
         {isDataLoaded && (
           <button
             onClick={onNewUpload}
-            className="text-sm font-bold text-text-muted hover:text-primary transition-all flex items-center gap-2 px-4 py-2 rounded-xl hover:bg-primary-light active:scale-95"
+            className="group relative text-sm font-bold text-white bg-primary hover:bg-primary-dark transition-all flex items-center gap-2 px-5 py-2.5 rounded-xl shadow-md shadow-primary/20 hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 active:scale-95"
           >
-            <Upload className="w-4 h-4" />
+            <Upload className="w-4 h-4 group-hover:-translate-y-0.5 transition-transform" />
             <span>새 파일 업로드</span>
+            <span className="absolute -top-1 -right-1 flex h-3 w-3">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-3 w-3 bg-accent border-2 border-white"></span>
+            </span>
           </button>
         )}
       </div>

@@ -5,6 +5,11 @@ export interface StudentInfo {
   disabilityType: string;
   treatmentArea: string;
   therapistName: string;
+  schedule?: {
+    day: string;   // 치료 요일 (예: "화, 목")
+    time: string;  // 치료 시간 (예: "14:00~14:50")
+    frequency: string; // 주 횟수 (예: "2")
+  };
   observations?: string;
 }
 

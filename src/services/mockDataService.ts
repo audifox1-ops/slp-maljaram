@@ -100,8 +100,8 @@ export function generateFallbackAnnualPlan() {
       '전반적인 치료 목표 달성을 위한 기초 다지기.',
       '상호작용 및 표현 능력 향상.',
     ],
-    monthlyGoals: Array.from({ length: 12 }).map((_, i) => ({
-      month: ((i + 2) % 12) + 1,
+    monthlyGoals: [3,4,5,6,7,8,9,10,11,12,1,2].map((month) => ({
+      month,
       goal: '월간 치료 목표 수립 및 이행',
       content: '영역별 맞춤 치료 프로그램 실시',
     })),

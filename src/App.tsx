@@ -7,6 +7,7 @@
  */
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
+import { Upload, Users, FileText, Sparkles } from 'lucide-react';
 import { Student, StudentInfo } from './types';
 import {
   downloadAnnualPlanAsWord,
@@ -152,7 +153,7 @@ export default function App() {
     if (selectedStudent) {
       fetchData(selectedStudent);
     }
-  }, [selectedMonth, selectedYear]);
+  }, [selectedMonth, selectedYear, fetchData]);
 
   // ─── 학생 선택 핸들러 ───
   const handleStudentSelect = useCallback(
@@ -181,7 +182,9 @@ export default function App() {
         school: info.school,
         disabilityType: info.disabilityType,
         treatmentArea: info.treatmentArea,
-        schedule: { day: '정보 없음', time: '정보 없음', frequency: '1' },
+        schedule: info.schedule
+          ? { day: info.schedule.day, time: info.schedule.time, frequency: info.schedule.frequency }
+          : { day: '', time: '', frequency: '1' },
         startDate: `${selectedYear}.03`,
         therapistName: info.therapistName,
         paymentDates,
@@ -466,13 +469,61 @@ export default function App() {
                     key="no-selection"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
-                    className="flex-1 flex flex-col items-center justify-center text-center py-20"
+                    className="flex-1 flex flex-col items-center justify-center py-10 max-w-2xl mx-auto w-full"
                   >
-                    <div className="w-20 h-20 bg-primary/5 rounded-[2rem] flex items-center justify-center mb-6">
-                      <div className="w-10 h-10 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
+                    <div className="bg-white rounded-3xl shadow-xl shadow-slate-200/50 border border-slate-100 p-8 md:p-12 w-full">
+                      <div className="text-center mb-10">
+                        <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary/10 text-primary mb-4">
+                          <Sparkles className="w-8 h-8" />
+                        </div>
+                        <h3 className="text-2xl font-black text-slate-800 mb-2">서류 생성을 시작해 볼까요?</h3>
+                        <p className="text-slate-500 font-medium">아래 3단계를 따라 AI가 자동으로 서류를 완성하도록 안내합니다.</p>
+                      </div>
+
+                      <div className="space-y-6">
+                        {/* Step 1 */}
+                        <div className="flex items-start gap-4 p-4 rounded-2xl bg-slate-50 border border-slate-100 transition-colors hover:bg-slate-100/50">
+                          <div className="flex-shrink-0 w-10 h-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-lg">
+                            1
+                          </div>
+                          <div>
+                            <h4 className="font-bold text-slate-800 mb-1 flex items-center gap-2">
+                              <Upload className="w-4 h-4 text-slate-400" />
+                              데이터 업로드
+                            </h4>
+                            <p className="text-sm text-slate-500">우측 상단의 <b>새 파일 업로드</b> 버튼을 눌러 결제 내역(CSV/Excel)을 등록해 주세요.</p>
+                          </div>
+                        </div>
+
+                        {/* Step 2 */}
+                        <div className="flex items-start gap-4 p-4 rounded-2xl bg-slate-50 border border-slate-100 transition-colors hover:bg-slate-100/50">
+                          <div className="flex-shrink-0 w-10 h-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-lg">
+                            2
+                          </div>
+                          <div>
+                            <h4 className="font-bold text-slate-800 mb-1 flex items-center gap-2">
+                              <Users className="w-4 h-4 text-slate-400" />
+                              학생 선택
+                            </h4>
+                            <p className="text-sm text-slate-500">좌측 학생 목록에서 <b>문서를 작성할 학생</b>을 클릭해 주세요. 필요시 [학생 정보 관리] 탭에서 부족한 정보를 채워주세요.</p>
+                          </div>
+                        </div>
+
+                        {/* Step 3 */}
+                        <div className="flex items-start gap-4 p-4 rounded-2xl bg-slate-50 border border-slate-100 transition-colors hover:bg-slate-100/50">
+                          <div className="flex-shrink-0 w-10 h-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-lg">
+                            3
+                          </div>
+                          <div>
+                            <h4 className="font-bold text-slate-800 mb-1 flex items-center gap-2">
+                              <FileText className="w-4 h-4 text-slate-400" />
+                              AI 자동 생성 및 확인
+                            </h4>
+                            <p className="text-sm text-slate-500">학생을 선택하는 즉시 <b>AI가 연간계획서와 월별일지를 자동 작성</b>합니다. 검토 후 다운로드 하세요!</p>
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                    <h3 className="text-xl font-black text-text-main mb-2">분석 완료</h3>
-                    <p className="text-text-muted font-medium">왼쪽 목록에서 학생을 선택하여 서류를 생성해 보세요.</p>
                   </motion.div>
                 )}
               </AnimatePresence>

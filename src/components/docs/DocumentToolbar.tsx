@@ -81,7 +81,7 @@ export const DocumentToolbar: React.FC<DocumentToolbarProps> = ({
             onChange={(e) => setSelectedYear(Number(e.target.value))}
             className="bg-transparent text-sm font-bold outline-none cursor-pointer"
           >
-            {[2024, 2025, 2026].map((y) => (
+            {Array.from({ length: 3 }, (_, i) => new Date().getFullYear() - 1 + i).map((y) => (
               <option key={y} value={y}>
                 {y}년
               </option>

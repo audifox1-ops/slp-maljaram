@@ -20,11 +20,6 @@ const firebaseConfig = {
   firestoreDatabaseId: "ai-studio-f6c3d59c-c8ab-4ba0-973b-32245977679a",
 };
 
-console.log('[FIREBASE_DEBUG] Initializing with:', {
-  projectId: firebaseConfig.projectId,
-  databaseId: firebaseConfig.firestoreDatabaseId,
-  isProd: import.meta.env.PROD
-});
 
 const app = initializeApp(firebaseConfig);
 export const db = getFirestore(app, firebaseConfig.firestoreDatabaseId || '(default)');
