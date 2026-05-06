@@ -42,6 +42,13 @@ export async function downloadAnnualPlanAsWord(
     right: createBorder(),
   };
 
+  const renderMultiline = (text: string, options?: any) => {
+    if (!text) return [new TextRun({ text: '', ...options })];
+    return text.replace(/\r\n/g, '\n').split('\n').map((line, i) => 
+      new TextRun({ text: line, break: i > 0 ? 1 : 0, ...options })
+    );
+  };
+
   const doc = new Document({
     sections: [
       {
@@ -184,7 +191,7 @@ export async function downloadAnnualPlanAsWord(
           ...data.currentLevel.map(
             (text) =>
               new Paragraph({ 
-                children: [new TextRun({ text: `• ${text}`, font: FONT_NAME })],
+                children: [new TextRun({ text: '• ', font: FONT_NAME }), ...renderMultiline(text, { font: FONT_NAME })],
                 indent: { left: 440 },
                 spacing: { after: 120 },
               })
@@ -199,7 +206,7 @@ export async function downloadAnnualPlanAsWord(
           ...data.longTermGoals.map(
             (text) =>
               new Paragraph({ 
-                children: [new TextRun({ text: `• ${text}`, font: FONT_NAME })],
+                children: [new TextRun({ text: '• ', font: FONT_NAME }), ...renderMultiline(text, { font: FONT_NAME })],
                 indent: { left: 440 },
                 spacing: { after: 120 },
               })
@@ -245,13 +252,13 @@ export async function downloadAnnualPlanAsWord(
                         verticalAlign: VerticalAlign.CENTER,
                       }),
                       new TableCell({
-                        children: [new Paragraph({ children: [new TextRun({ text: goal.goal, font: FONT_NAME })] })],
+                        children: [new Paragraph({ children: renderMultiline(goal.goal, { font: FONT_NAME }) })],
                         borders,
                         verticalAlign: VerticalAlign.CENTER,
                         margins: { left: 100, right: 100 },
                       }),
                       new TableCell({
-                        children: [new Paragraph({ children: [new TextRun({ text: goal.content, font: FONT_NAME })] })],
+                        children: [new Paragraph({ children: renderMultiline(goal.content, { font: FONT_NAME }) })],
                         borders,
                         verticalAlign: VerticalAlign.CENTER,
                         margins: { left: 100, right: 100 },
@@ -305,6 +312,13 @@ export async function downloadMonthlyJournalAsWord(
     bottom: createBorder(),
     left: createBorder(),
     right: createBorder(),
+  };
+
+  const renderMultiline = (text: string, options?: any) => {
+    if (!text) return [new TextRun({ text: '', ...options })];
+    return text.replace(/\r\n/g, '\n').split('\n').map((line, i) => 
+      new TextRun({ text: line, break: i > 0 ? 1 : 0, ...options })
+    );
   };
 
   const doc = new Document({
@@ -448,7 +462,7 @@ export async function downloadMonthlyJournalAsWord(
                   }),
                   new TableCell({
                     children: [
-                      new Paragraph({ children: [new TextRun({ text: data.currentLevel, font: FONT_NAME })] }),
+                      new Paragraph({ children: renderMultiline(data.currentLevel, { font: FONT_NAME }) }),
                     ],
                     borders,
                     verticalAlign: VerticalAlign.CENTER,
@@ -473,7 +487,7 @@ export async function downloadMonthlyJournalAsWord(
                   }),
                   new TableCell({
                     children: [
-                      new Paragraph({ children: [new TextRun({ text: data.monthlyGoal, font: FONT_NAME })] }),
+                      new Paragraph({ children: renderMultiline(data.monthlyGoal, { font: FONT_NAME }) }),
                     ],
                     borders,
                     verticalAlign: VerticalAlign.CENTER,
@@ -519,20 +533,20 @@ export async function downloadMonthlyJournalAsWord(
                         verticalAlign: VerticalAlign.CENTER,
                       }),
                       new TableCell({
-                        children: [new Paragraph({ children: [new TextRun({ text: session.content, font: FONT_NAME })] })],
+                        children: [new Paragraph({ children: renderMultiline(session.content, { font: FONT_NAME }) })],
                         borders,
                         verticalAlign: VerticalAlign.CENTER,
                         margins: { left: 100, top: 100, bottom: 100 },
                       }),
                       new TableCell({
-                        children: [new Paragraph({ children: [new TextRun({ text: session.reaction, font: FONT_NAME })] })],
+                        children: [new Paragraph({ children: renderMultiline(session.reaction, { font: FONT_NAME }) })],
                         borders,
                         verticalAlign: VerticalAlign.CENTER,
                         margins: { left: 100, top: 100, bottom: 100 },
                       }),
                       new TableCell({
                         children: [
-                          new Paragraph({ children: [new TextRun({ text: session.consultation, font: FONT_NAME, size: 18 })] }),
+                          new Paragraph({ children: renderMultiline(session.consultation, { font: FONT_NAME, size: 18 }) }),
                         ],
                         borders,
                         verticalAlign: VerticalAlign.CENTER,
@@ -565,7 +579,7 @@ export async function downloadMonthlyJournalAsWord(
                     verticalAlign: VerticalAlign.CENTER,
                   }),
                   new TableCell({
-                    children: [new Paragraph({ children: [new TextRun({ text: data.result, font: FONT_NAME })] })],
+                    children: [new Paragraph({ children: renderMultiline(data.result, { font: FONT_NAME }) })],
                     borders,
                     verticalAlign: VerticalAlign.CENTER,
                     margins: { left: 100, top: 100, bottom: 100 },

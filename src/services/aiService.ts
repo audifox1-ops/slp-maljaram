@@ -19,6 +19,36 @@ function executeWithTimeout<T>(promise: Promise<T>, timeoutMs: number): Promise<
     ),
   ]);
 }
+
+async function executeWithRetry<T>(
+  operation: () => Promise<T>,
+  maxRetries: number = 3,
+  baseDelayMs: number = 2000
+): Promise<T> {
+  let attempt = 0;
+  while (attempt < maxRetries) {
+    try {
+      return await operation();
+    } catch (error: any) {
+      attempt++;
+      // 503 (Service Unavailable) or 429 (Too Many Requests) are retryable
+      const isRetryable = error?.status === 503 || error?.status === 429 || 
+                          error?.message?.includes('503') || error?.message?.includes('429') ||
+                          error?.message?.includes('fetch failed') || error?.message?.includes('Timeout');
+      
+      if (!isRetryable || attempt >= maxRetries) {
+        throw error;
+      }
+      
+      // Exponential backoff with jitter
+      const delay = baseDelayMs * Math.pow(2, attempt - 1) + Math.random() * 1000;
+      console.warn(`[AI Service] API request failed (Attempt ${attempt}/${maxRetries}). Retrying in ${Math.round(delay)}ms...`, error?.message || error);
+      
+      await new Promise(resolve => setTimeout(resolve, delay));
+    }
+  }
+  throw new Error("Max retries reached");
+}
 function safeJsonParse(text: string) {
   try {
     // Attempt direct parse
@@ -81,14 +111,14 @@ export async function generateAnnualPlan(student: Student): Promise<AnnualPlanDa
       }
     `;
 
-    const response = await executeWithTimeout(ai.models.generateContent({
+    const response = await executeWithRetry(() => executeWithTimeout(ai.models.generateContent({
       model: "gemini-2.0-flash",
       contents: [{ role: "user", parts: [{ text: prompt }] }],
       config: {
         responseMimeType: "application/json",
         maxOutputTokens: 8192
       }
-    }), TIMEOUT_MS);
+    }), TIMEOUT_MS));
 
     if (!response.text) throw new Error('Empty response from AI');
     return safeJsonParse(response.text);
@@ -143,14 +173,14 @@ export async function generateMonthlyJournal(student: Student, month: number, mo
       }
     `;
 
-    const response = await executeWithTimeout(ai.models.generateContent({
+    const response = await executeWithRetry(() => executeWithTimeout(ai.models.generateContent({
       model: "gemini-2.0-flash",
       contents: [{ role: "user", parts: [{ text: prompt }] }],
       config: {
         responseMimeType: "application/json",
         maxOutputTokens: 8192
       }
-    }), TIMEOUT_MS);
+    }), TIMEOUT_MS));
 
     if (!response.text) throw new Error('Empty response from AI');
     return safeJsonParse(response.text);

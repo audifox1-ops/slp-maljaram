@@ -152,7 +152,7 @@ function formatForHwpx(text: string): string {
     }
   });
 
-  // 2. 줄바꿈(\n)을 HWPX의 <hp:br/> 태그로 변환
+  // 2. 줄바꿈(\r\n, \n)을 HWPX의 <hp:br/> 태그로 변환
   // 템플릿의 <hp:t> 태그 내에 삽입될 것을 가정하므로, 태그를 닫고 줄바꿈 후 다시 엽니다.
-  return escaped.split('\n').join('</hp:t><hp:br/><hp:t>');
+  return escaped.replace(/\r\n/g, '\n').split('\n').join('</hp:t><hp:br/><hp:t>');
 }

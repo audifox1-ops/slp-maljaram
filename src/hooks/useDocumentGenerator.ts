@@ -291,24 +291,24 @@ export function useDocumentGenerator(
         }
 
         // 2. 월별 순회하며 생성
-        const monthsToProcess = [];
+        const monthsToProcess: { month: number, year: number }[] = [];
         if (startMonth <= endMonth) {
-          for (let m = startMonth; m <= endMonth; m++) monthsToProcess.push(m);
+          for (let m = startMonth; m <= endMonth; m++) monthsToProcess.push({ month: m, year: selectedYear });
         } else {
-          // 연도 걸침 (예: 11월 ~ 2월) - 현재 시스템은 단일 연도 내 처리가 기본이므로 로그만 남김
-          for (let m = startMonth; m <= 12; m++) monthsToProcess.push(m);
-          for (let m = 1; m <= endMonth; m++) monthsToProcess.push(m);
+          // 연도 걸침 (예: 11월 ~ 2월)
+          for (let m = startMonth; m <= 12; m++) monthsToProcess.push({ month: m, year: selectedYear });
+          for (let m = 1; m <= endMonth; m++) monthsToProcess.push({ month: m, year: selectedYear + 1 });
         }
 
-        for (const m of monthsToProcess) {
+        for (const { month: m, year: y } of monthsToProcess) {
           if (progressCallback) progressCallback(m);
 
-          // 이미 데이터가 있는지 확인
-          const existing = await getMonthlyJournal(student.name, selectedYear, m);
+          // 이미 데이터가 있는지 확인 (해당 연도/월)
+          const existing = await getMonthlyJournal(student.name, y, m);
           if (existing) continue;
 
           // 결제 내역 필터링
-          const filteredDates = filterDatesByYearMonth(student.paymentDates, selectedYear, m);
+          const filteredDates = filterDatesByYearMonth(student.paymentDates, y, m);
           const monthlyGoal = currentAnnual.monthlyGoals.find((g) => g.month === m)?.goal || '목표 미설정';
 
           let monthly: MonthlyJournalData;
@@ -322,7 +322,7 @@ export function useDocumentGenerator(
                 currentLevel: '현재 치료 목표에 따른 활동을 수행 중임.',
                 monthlyGoal,
                 sessions: generateMockSessions(
-                  [1, 8, 15, 22].map(d => `${selectedYear}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`),
+                  [1, 8, 15, 22].map(d => `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`),
                   student.treatmentArea,
                   monthlyGoal
                 ),
@@ -335,7 +335,7 @@ export function useDocumentGenerator(
               currentLevel: '현재 치료 목표에 따른 활동을 수행 중임.',
               monthlyGoal,
               sessions: generateMockSessions(
-                filteredDates.length > 0 ? filteredDates : [1, 8, 15, 22].map(d => `${selectedYear}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`),
+                filteredDates.length > 0 ? filteredDates : [1, 8, 15, 22].map(d => `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`),
                 student.treatmentArea,
                 monthlyGoal
               ),
@@ -344,7 +344,7 @@ export function useDocumentGenerator(
           }
 
           // 저장
-          await saveMonthlyJournal(student.name, selectedYear, m, monthly);
+          await saveMonthlyJournal(student.name, y, m, monthly);
           
           // 현재 활성화된 월이면 상태 업데이트
           if (m === selectedMonth) {

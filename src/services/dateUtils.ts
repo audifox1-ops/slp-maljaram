@@ -106,9 +106,7 @@ export function calculateStudentAge(birthDate: string): {
   }
 
   // 만 나이 계산
-  // 실제 나이는 생년월일 전체가 필요하므로 parseDateString을 보완하여 일(day)까지 추출
-  const dateMatch = birthDate.match(/(\d{2,4})[-./\s년]*(\d{1,2})[-./\s월]*(\d{1,2})/);
-  const birthDay = dateMatch ? parseInt(dateMatch[3], 10) : 1;
+  const birthDay = parsed.day || 1;
   
   let age = currentYear - birthYear;
   if (currentMonth < parsed.month || (currentMonth === parsed.month && currentDay < birthDay)) {
