@@ -213,7 +213,19 @@ export const MonthlyJournal: React.FC<Props> = ({ student, data, month, year, on
           {editedData.sessions.length > 0 ? (
             editedData.sessions.map((session, idx) => (
               <tr key={idx} className="h-20">
-                <td className="border border-black p-2 text-center font-bold">{session.date}</td>
+                <td className="border border-black p-2 text-center font-bold">
+                  {isEditing ? (
+                    <input
+                      type="text"
+                      value={session.date}
+                      onChange={(e) => updateSession(idx, 'date', e.target.value)}
+                      className="w-full text-center border-none focus:ring-1 focus:ring-primary p-1 bg-slate-50 font-mono text-[0.8rem]"
+                      placeholder="YYYY-MM-DD"
+                    />
+                  ) : (
+                    session.date
+                  )}
+                </td>
                 <td className="border border-black p-2 leading-relaxed">
                   {isEditing ? (
                     <textarea
