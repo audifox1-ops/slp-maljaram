@@ -3,9 +3,10 @@
  * 좌측 학생 목록 사이드바: 검색, 리스트, 자동 등록 버튼, 초기화 버튼
  */
 import React from 'react';
-import { Search, Trash2 } from 'lucide-react';
+import { Search, Trash2, AlertTriangle } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Student, StudentInfo, RawRecord } from '../../types';
+import { Student, StudentInfo } from '../../types';
+import { countInvalidDates } from '../../services/scheduleValidationService';
 
 interface StudentSidebarProps {
   searchTerm: string;
@@ -16,6 +17,8 @@ interface StudentSidebarProps {
   onStudentSelect: (name: string) => void;
   onAutoRegister: (name: string) => void;
   onResetAllData: () => void;
+  /** 학생별 결제 날짜 Map (이름 → 날짜 배열) */
+  paymentDatesByStudent: Map<string, string[]>;
 }
 
 export const StudentSidebar: React.FC<StudentSidebarProps> = ({
@@ -27,6 +30,7 @@ export const StudentSidebar: React.FC<StudentSidebarProps> = ({
   onStudentSelect,
   onAutoRegister,
   onResetAllData,
+  paymentDatesByStudent,
 }) => {
   return (
     <aside className="w-80 border-r border-border-theme bg-white/40 backdrop-blur-xl flex flex-col no-print">
@@ -89,10 +93,31 @@ export const StudentSidebar: React.FC<StudentSidebarProps> = ({
                 </div>
                 <div className="flex flex-col">
                   <span className="font-bold text-sm tracking-tight">{name}</span>
-                  <span className="text-[10px] text-text-muted font-medium">언어재활 세션</span>
+                  <span className="text-[10px] text-text-muted font-medium">
+                    {studentInfos.find((s) => s.name === name)?.treatmentArea || '언어재활 세션'}
+                  </span>
                 </div>
 
                 <div className="ml-auto flex items-center gap-2">
+                  {/* 요일 불일치 경고 뱃지 */}
+                  {(() => {
+                    const info = studentInfos.find((s) => s.name === name);
+                    const dates = paymentDatesByStudent.get(name) || [];
+                    const scheduleDay = info?.schedule?.day || '';
+                    const invalidCount = info ? countInvalidDates(dates, scheduleDay) : 0;
+                    return invalidCount > 0 ? (
+                      <motion.div
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        className="flex items-center gap-1 px-2 py-0.5 bg-amber-100 text-amber-700 text-[9px] font-black rounded-full border border-amber-200"
+                        title={`결제 날짜 불일치 ${invalidCount}건`}
+                      >
+                        <AlertTriangle className="w-2.5 h-2.5" />
+                        {invalidCount}
+                      </motion.div>
+                    ) : null;
+                  })()}
+
                   {!studentInfos.some((s) => s.name === name) && (
                     <motion.button
                       whileHover={{ scale: 1.05 }}

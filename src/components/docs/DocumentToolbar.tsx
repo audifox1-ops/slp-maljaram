@@ -17,6 +17,7 @@ interface DocumentToolbarProps {
   monthlyData: MonthlyJournalData | null;
   onDownloadWord: () => void;
   onDownloadHWPX: () => void;
+  onDownloadPdf: () => void;
   onPrint: () => void;
   onGenerateDraft: () => void;
   onOpenBatchModal: () => void;
@@ -33,6 +34,7 @@ export const DocumentToolbar: React.FC<DocumentToolbarProps> = ({
   monthlyData,
   onDownloadWord,
   onDownloadHWPX,
+  onDownloadPdf,
   onPrint,
   onGenerateDraft,
   onOpenBatchModal,
@@ -117,6 +119,15 @@ export const DocumentToolbar: React.FC<DocumentToolbarProps> = ({
         >
           <Download className="w-4 h-4" />
           HWPX
+        </button>
+
+        {/* PDF 다운로드 */}
+        <button
+          onClick={onDownloadPdf}
+          className="flex items-center gap-2 px-6 py-2.5 bg-white border border-rose-400 text-rose-500 rounded-xl font-bold text-sm hover:bg-rose-50 transition-all"
+        >
+          <Download className="w-4 h-4" />
+          PDF
         </button>
 
         {/* 인쇄 */}

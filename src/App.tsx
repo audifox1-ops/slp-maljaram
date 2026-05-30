@@ -17,6 +17,9 @@ import {
   downloadAnnualPlanAsHWPX,
   downloadMonthlyJournalAsHWPX,
 } from './services/hwpxExportService';
+import { downloadAsPdf } from './services/pdfExportService';
+import { validatePaymentDates } from './services/scheduleValidationService';
+import { filterDatesByYearMonth } from './services/dateUtils';
 
 // 커스텀 훅
 import { useStudents } from './hooks/useStudents';
@@ -39,6 +42,7 @@ import { StudentSidebar } from './components/docs/StudentSidebar';
 import { DocumentToolbar } from './components/docs/DocumentToolbar';
 import { DocumentPreview } from './components/docs/DocumentPreview';
 import { BatchGenerationModal } from './components/docs/BatchGenerationModal';
+import { ScheduleValidationPanel } from './components/docs/ScheduleValidationPanel';
 
 
 // 기존 컴포넌트
@@ -108,6 +112,39 @@ export default function App() {
       ? allNames.filter((name) => name.toLowerCase().includes(term))
       : allNames;
   }, [searchTerm, allPaymentRecords, studentInfos]);
+
+  // ─── 학생별 전체 결제 날짜 Map (사이드바 뱃지용) ───
+  const paymentDatesByStudent = useMemo(() => {
+    const map = new Map<string, string[]>();
+    for (const record of allPaymentRecords) {
+      const name = record.studentName;
+      if (!name) continue;
+      const existing = map.get(name) || [];
+      if (record.transactionDate) existing.push(record.transactionDate);
+      map.set(name, existing);
+    }
+    return map;
+  }, [allPaymentRecords]);
+
+  // ─── 현재 선택 학생·월의 검증 결과 (ScheduleValidationPanel용) ───
+  const validationResults = useMemo(() => {
+    if (!selectedStudent) return [];
+    const info = studentInfos.find((s) => s.name === selectedStudent.name);
+    const scheduleDay = info?.schedule?.day || '';
+    if (!scheduleDay) return [];
+    const monthlyDates = filterDatesByYearMonth(
+      selectedStudent.paymentDates,
+      selectedYear,
+      selectedMonth
+    );
+    return validatePaymentDates(monthlyDates, scheduleDay);
+  }, [selectedStudent, studentInfos, selectedYear, selectedMonth]);
+
+  const selectedStudentScheduleDay = useMemo(() => {
+    if (!selectedStudent) return '';
+    const info = studentInfos.find((s) => s.name === selectedStudent.name);
+    return info?.schedule?.day || '';
+  }, [selectedStudent, studentInfos]);
 
   // ─── 선택된 학생 데이터 실시간 동기화 ───
   useEffect(() => {
@@ -343,6 +380,23 @@ export default function App() {
     showToast,
   ]);
 
+  // ─── PDF 다운로드 핸들러 ───
+  const handleDownloadPdf = useCallback(async () => {
+    if (!selectedStudent) return;
+    setIsLoading(true);
+    try {
+      const tab = activeTab === 'annual' ? '연간계획서' : `${selectedMonth}월일지`;
+      const fileName = `${selectedStudent.name}_${selectedYear}_${tab}`;
+      await downloadAsPdf(fileName);
+      showToast({ type: 'success', message: 'PDF 파일이 저장되었습니다.' }, 3000);
+    } catch (err) {
+      console.error('PDF download failed:', err);
+      showToast({ type: 'error', message: 'PDF 생성 중 오류가 발생했습니다.' }, 3000);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [selectedStudent, activeTab, selectedYear, selectedMonth, showToast]);
+
   // ─── 가상 일지 생성 핸들러 ───
   const handleGenerateDraft = useCallback(() => {
     if (selectedStudent) {
@@ -422,6 +476,7 @@ export default function App() {
               onStudentSelect={handleStudentSelect}
               onAutoRegister={handleAutoRegister}
               onResetAllData={resetAllData}
+              paymentDatesByStudent={paymentDatesByStudent}
             />
 
             <div className="flex-1 flex flex-col p-6 md:p-10 gap-8 overflow-auto">
@@ -445,9 +500,18 @@ export default function App() {
                       monthlyData={monthlyData}
                       onDownloadWord={handleDownloadWord}
                       onDownloadHWPX={handleDownloadHWPX}
+                      onDownloadPdf={handleDownloadPdf}
                       onPrint={handlePrint}
                       onGenerateDraft={handleGenerateDraft}
                       onOpenBatchModal={() => setIsBatchModalOpen(true)}
+                    />
+
+                    {/* 결제 날짜 ↔ 수업 요일 검증 패널 */}
+                    <ScheduleValidationPanel
+                      results={validationResults}
+                      scheduleDay={selectedStudentScheduleDay}
+                      selectedYear={selectedYear}
+                      selectedMonth={selectedMonth}
                     />
 
                     <DocumentPreview
