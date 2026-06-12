@@ -12,6 +12,7 @@ import { Student, StudentInfo } from './types';
 import { validatePaymentDates } from './services/scheduleValidationService';
 import { filterDatesByYearMonth } from './services/dateUtils';
 import { TemplateSettings, loadTemplateSettings } from './services/templateService';
+import { isOnboardingCompleted, completeOnboarding } from './services/onboardingService';
 
 // 커스텀 훅
 import { useStudents } from './hooks/useStudents';
@@ -40,6 +41,7 @@ const BatchGenerationModal = lazy(() => import('./components/docs/BatchGeneratio
 const StudentManagement = lazy(() => import('./components/StudentManagement').then(m => ({ default: m.StudentManagement })));
 const TemplateSettingsModal = lazy(() => import('./components/docs/TemplateSettingsModal').then(m => ({ default: m.TemplateSettingsModal })));
 const Dashboard = lazy(() => import('./components/dashboard/Dashboard').then(m => ({ default: m.Dashboard })));
+const OnboardingModal = lazy(() => import('./components/onboarding/OnboardingModal').then(m => ({ default: m.OnboardingModal })));
 
 // 내보내기 서비스 동적 임포트
 const wordExportService = () => import('./services/wordExportService');
@@ -58,6 +60,7 @@ export default function App() {
   const [isBatchModalOpen, setIsBatchModalOpen] = useState(false);
   const [isTemplateModalOpen, setIsTemplateModalOpen] = useState(false);
   const [templateSettings, setTemplateSettings] = useState<TemplateSettings>(loadTemplateSettings());
+  const [isOnboardingOpen, setIsOnboardingOpen] = useState(!isOnboardingCompleted());
 
   const { showToast } = useToast();
 
@@ -643,6 +646,17 @@ export default function App() {
           isOpen={isTemplateModalOpen}
           onClose={() => setIsTemplateModalOpen(false)}
           onSave={(settings) => setTemplateSettings(settings)}
+        />
+      </Suspense>
+
+      <Suspense fallback={null}>
+        <OnboardingModal
+          isOpen={isOnboardingOpen}
+          onClose={() => setIsOnboardingOpen(false)}
+          onComplete={() => {
+            completeOnboarding();
+            setIsOnboardingOpen(false);
+          }}
         />
       </Suspense>
 
