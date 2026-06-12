@@ -5,21 +5,13 @@
  * UI 렌더링은 분리된 컴포넌트(AppHeader, StudentSidebar, DocumentToolbar 등)로 위임합니다.
  * 이 파일은 이들을 조합하는 역할만 수행합니다.
  */
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, Suspense, lazy } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Upload, Users, FileText, Sparkles } from 'lucide-react';
+import { Upload, Users, FileText, Sparkles, Settings } from 'lucide-react';
 import { Student, StudentInfo } from './types';
-import {
-  downloadAnnualPlanAsWord,
-  downloadMonthlyJournalAsWord,
-} from './services/wordExportService';
-import {
-  downloadAnnualPlanAsHWPX,
-  downloadMonthlyJournalAsHWPX,
-} from './services/hwpxExportService';
-import { downloadAsPdf } from './services/pdfExportService';
 import { validatePaymentDates } from './services/scheduleValidationService';
 import { filterDatesByYearMonth } from './services/dateUtils';
+import { TemplateSettings, loadTemplateSettings } from './services/templateService';
 
 // 커스텀 훅
 import { useStudents } from './hooks/useStudents';
@@ -37,16 +29,21 @@ import { HeroSection } from './components/home/HeroSection';
 import { FileUploadCard } from './components/home/FileUploadCard';
 import { FeatureGrid } from './components/home/FeatureGrid';
 
-// 문서 화면 컴포넌트
+// 문서 화면 컴포넌트 (무거운 컴포넌트는 동적 임포트)
 import { StudentSidebar } from './components/docs/StudentSidebar';
 import { DocumentToolbar } from './components/docs/DocumentToolbar';
-import { DocumentPreview } from './components/docs/DocumentPreview';
-import { BatchGenerationModal } from './components/docs/BatchGenerationModal';
 import { ScheduleValidationPanel } from './components/docs/ScheduleValidationPanel';
 
+// 동적 임포트로 코드 스플리팅
+const DocumentPreview = lazy(() => import('./components/docs/DocumentPreview').then(m => ({ default: m.DocumentPreview })));
+const BatchGenerationModal = lazy(() => import('./components/docs/BatchGenerationModal').then(m => ({ default: m.BatchGenerationModal })));
+const StudentManagement = lazy(() => import('./components/StudentManagement').then(m => ({ default: m.StudentManagement })));
+const TemplateSettingsModal = lazy(() => import('./components/docs/TemplateSettingsModal').then(m => ({ default: m.TemplateSettingsModal })));
 
-// 기존 컴포넌트
-import { StudentManagement } from './components/StudentManagement';
+// 내보내기 서비스 동적 임포트
+const wordExportService = () => import('./services/wordExportService');
+const hwpxExportService = () => import('./services/hwpxExportService');
+const pdfExportService = () => import('./services/pdfExportService');
 
 export default function App() {
   // ─── 공유 상태 ───
@@ -58,6 +55,8 @@ export default function App() {
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [isBatchModalOpen, setIsBatchModalOpen] = useState(false);
+  const [isTemplateModalOpen, setIsTemplateModalOpen] = useState(false);
+  const [templateSettings, setTemplateSettings] = useState<TemplateSettings>(loadTemplateSettings());
 
   const { showToast } = useToast();
 
@@ -314,6 +313,7 @@ export default function App() {
     if (!selectedStudent) return;
 
     try {
+      const { downloadAnnualPlanAsWord, downloadMonthlyJournalAsWord } = await wordExportService();
       if (activeTab === 'annual' && annualData) {
         await downloadAnnualPlanAsWord(selectedStudent, annualData, selectedYear);
       } else if (activeTab === 'monthly' && monthlyData) {
@@ -347,6 +347,7 @@ export default function App() {
 
     setIsLoading(true);
     try {
+      const { downloadAnnualPlanAsHWPX, downloadMonthlyJournalAsHWPX } = await hwpxExportService();
       if (activeTab === 'annual' && annualData) {
         await downloadAnnualPlanAsHWPX(selectedStudent, annualData, selectedYear);
       } else if (activeTab === 'monthly' && monthlyData) {
@@ -385,6 +386,7 @@ export default function App() {
     if (!selectedStudent) return;
     setIsLoading(true);
     try {
+      const { downloadAsPdf } = await pdfExportService();
       const tab = activeTab === 'annual' ? '연간계획서' : `${selectedMonth}월일지`;
       const fileName = `${selectedStudent.name}_${selectedYear}_${tab}`;
       await downloadAsPdf(fileName);
@@ -421,12 +423,21 @@ export default function App() {
         <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-accent/5 rounded-full blur-[100px] -translate-x-1/2 translate-y-1/2" />
       </div>
 
-      <AppHeader
-        currentView={currentView}
-        setCurrentView={setCurrentView}
-        isDataLoaded={isDataLoaded || allPaymentRecords.length > 0}
-        onNewUpload={resetUpload}
-      />
+      <div className="flex items-center">
+        <AppHeader
+          currentView={currentView}
+          setCurrentView={setCurrentView}
+          isDataLoaded={isDataLoaded || allPaymentRecords.length > 0}
+          onNewUpload={resetUpload}
+        />
+        <button
+          onClick={() => setIsTemplateModalOpen(true)}
+          className="mr-4 p-2 hover:bg-white/50 rounded-xl transition-colors"
+          title="템플릿 설정"
+        >
+          <Settings className="w-5 h-5 text-text-muted" />
+        </button>
+      </div>
 
       <AnimatePresence mode="wait">
         {currentView === 'students' ? (
@@ -437,12 +448,14 @@ export default function App() {
             exit={{ opacity: 0, y: -10 }}
             className="flex-1 p-6 md:p-10 max-w-5xl mx-auto w-full"
           >
-            <StudentManagement
-              studentInfos={studentInfos}
-              onAdd={addStudent}
-              onUpdate={updateStudent}
-              onDelete={deleteStudent}
-            />
+            <Suspense fallback={<div className="flex items-center justify-center h-64"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>}>
+              <StudentManagement
+                studentInfos={studentInfos}
+                onAdd={addStudent}
+                onUpdate={updateStudent}
+                onDelete={deleteStudent}
+              />
+            </Suspense>
           </motion.main>
         ) : !isDataLoaded && allPaymentRecords.length === 0 ? (
           <motion.main
@@ -514,19 +527,21 @@ export default function App() {
                       selectedMonth={selectedMonth}
                     />
 
-                    <DocumentPreview
-                      selectedStudent={selectedStudent}
-                      activeTab={activeTab}
-                      annualData={annualData}
-                      monthlyData={monthlyData}
-                      isLoading={isAnyLoading}
-                      selectedYear={selectedYear}
-                      selectedMonth={selectedMonth}
-                      onSaveAnnual={(data) => selectedStudent && saveAnnualData(selectedStudent, data)}
-                      onSaveMonthly={(data) => selectedStudent && saveMonthlyData(selectedStudent, data)}
-                      onRegenerateAnnual={() => selectedStudent && regenerateAnnualData(selectedStudent)}
-                      onRegenerateMonthly={() => selectedStudent && regenerateMonthlyData(selectedStudent)}
-                    />
+                    <Suspense fallback={<div className="flex items-center justify-center h-64"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>}>
+                      <DocumentPreview
+                        selectedStudent={selectedStudent}
+                        activeTab={activeTab}
+                        annualData={annualData}
+                        monthlyData={monthlyData}
+                        isLoading={isAnyLoading}
+                        selectedYear={selectedYear}
+                        selectedMonth={selectedMonth}
+                        onSaveAnnual={(data) => selectedStudent && saveAnnualData(selectedStudent, data)}
+                        onSaveMonthly={(data) => selectedStudent && saveMonthlyData(selectedStudent, data)}
+                        onRegenerateAnnual={() => selectedStudent && regenerateAnnualData(selectedStudent)}
+                        onRegenerateMonthly={() => selectedStudent && regenerateMonthlyData(selectedStudent)}
+                      />
+                    </Suspense>
                   </motion.div>
                 ) : (
                   <motion.div
@@ -596,12 +611,22 @@ export default function App() {
         )}
       </AnimatePresence>
 
-      <BatchGenerationModal 
-        isOpen={isBatchModalOpen}
-        onClose={() => setIsBatchModalOpen(false)}
-        onGenerate={handleBatchGenerate}
-        currentYear={selectedYear}
-      />
+      <Suspense fallback={null}>
+        <BatchGenerationModal 
+          isOpen={isBatchModalOpen}
+          onClose={() => setIsBatchModalOpen(false)}
+          onGenerate={handleBatchGenerate}
+          currentYear={selectedYear}
+        />
+      </Suspense>
+
+      <Suspense fallback={null}>
+        <TemplateSettingsModal
+          isOpen={isTemplateModalOpen}
+          onClose={() => setIsTemplateModalOpen(false)}
+          onSave={(settings) => setTemplateSettings(settings)}
+        />
+      </Suspense>
 
       <AppFooter />
     </div>
