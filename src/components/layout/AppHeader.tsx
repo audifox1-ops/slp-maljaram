@@ -1,13 +1,13 @@
 /**
  * AppHeader 컴포넌트
- * 상단 네비게이션 바: 로고, 탭 전환(서류 생성/학생 정보 관리), 새 파일 업로드 버튼
+ * 상단 네비게이션 바: 로고, 탭 전환(대시보드/서류 생성/학생 정보 관리), 새 파일 업로드 버튼
  */
 import React, { useState, useEffect } from 'react';
-import { FileText, Upload, Calendar } from 'lucide-react';
+import { FileText, Upload, Calendar, LayoutDashboard, Users } from 'lucide-react';
 
 interface AppHeaderProps {
-  currentView: 'docs' | 'students';
-  setCurrentView: (view: 'docs' | 'students') => void;
+  currentView: 'dashboard' | 'docs' | 'students';
+  setCurrentView: (view: 'dashboard' | 'docs' | 'students') => void;
   isDataLoaded: boolean;
   onNewUpload: () => void;
 }
@@ -50,6 +50,17 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
 
       <nav className="hidden md:flex items-center gap-1.5 bg-slate-100/50 p-1.5 rounded-2xl no-print border border-slate-200/50">
         <button
+          onClick={() => setCurrentView('dashboard')}
+          className={`px-5 py-2 rounded-xl text-sm font-bold transition-all duration-300 flex items-center gap-2 ${
+            currentView === 'dashboard'
+              ? 'bg-white text-primary shadow-md shadow-primary/5'
+              : 'text-text-muted hover:text-text-main hover:bg-white/40'
+          }`}
+        >
+          <LayoutDashboard className="w-4 h-4" />
+          대시보드
+        </button>
+        <button
           onClick={() => setCurrentView('docs')}
           className={`px-5 py-2 rounded-xl text-sm font-bold transition-all duration-300 ${
             currentView === 'docs'
@@ -72,13 +83,50 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
       </nav>
 
       <div className="flex items-center gap-4">
+        {/* 모바일 메뉴 */}
+        <div className="md:hidden flex items-center gap-2">
+          <button
+            onClick={() => setCurrentView('dashboard')}
+            className={`p-2 rounded-xl transition-all ${
+              currentView === 'dashboard'
+                ? 'bg-primary text-white'
+                : 'text-text-muted hover:bg-slate-100'
+            }`}
+            title="대시보드"
+          >
+            <LayoutDashboard className="w-5 h-5" />
+          </button>
+          <button
+            onClick={() => setCurrentView('docs')}
+            className={`p-2 rounded-xl transition-all ${
+              currentView === 'docs'
+                ? 'bg-primary text-white'
+                : 'text-text-muted hover:bg-slate-100'
+            }`}
+            title="서류 생성"
+          >
+            <FileText className="w-5 h-5" />
+          </button>
+          <button
+            onClick={() => setCurrentView('students')}
+            className={`p-2 rounded-xl transition-all ${
+              currentView === 'students'
+                ? 'bg-primary text-white'
+                : 'text-text-muted hover:bg-slate-100'
+            }`}
+            title="학생 정보 관리"
+          >
+            <Users className="w-5 h-5" />
+          </button>
+        </div>
+
         {isDataLoaded && (
           <button
             onClick={onNewUpload}
             className="group relative text-sm font-bold text-white bg-primary hover:bg-primary-dark transition-all flex items-center gap-2 px-5 py-2.5 rounded-xl shadow-md shadow-primary/20 hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 active:scale-95"
           >
             <Upload className="w-4 h-4 group-hover:-translate-y-0.5 transition-transform" />
-            <span>새 파일 업로드</span>
+            <span className="hidden sm:inline">새 파일 업로드</span>
             <span className="absolute -top-1 -right-1 flex h-3 w-3">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent opacity-75"></span>
               <span className="relative inline-flex rounded-full h-3 w-3 bg-accent border-2 border-white"></span>

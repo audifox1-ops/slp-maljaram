@@ -7,7 +7,7 @@
  */
 import React, { useState, useEffect, useMemo, useCallback, Suspense, lazy } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Upload, Users, FileText, Sparkles, Settings } from 'lucide-react';
+import { Upload, Users, FileText, Sparkles, Settings, LayoutDashboard } from 'lucide-react';
 import { Student, StudentInfo } from './types';
 import { validatePaymentDates } from './services/scheduleValidationService';
 import { filterDatesByYearMonth } from './services/dateUtils';
@@ -39,6 +39,7 @@ const DocumentPreview = lazy(() => import('./components/docs/DocumentPreview').t
 const BatchGenerationModal = lazy(() => import('./components/docs/BatchGenerationModal').then(m => ({ default: m.BatchGenerationModal })));
 const StudentManagement = lazy(() => import('./components/StudentManagement').then(m => ({ default: m.StudentManagement })));
 const TemplateSettingsModal = lazy(() => import('./components/docs/TemplateSettingsModal').then(m => ({ default: m.TemplateSettingsModal })));
+const Dashboard = lazy(() => import('./components/dashboard/Dashboard').then(m => ({ default: m.Dashboard })));
 
 // 내보내기 서비스 동적 임포트
 const wordExportService = () => import('./services/wordExportService');
@@ -48,7 +49,7 @@ const pdfExportService = () => import('./services/pdfExportService');
 export default function App() {
   // ─── 공유 상태 ───
   const [isLoading, setIsLoading] = useState(false);
-  const [currentView, setCurrentView] = useState<'docs' | 'students'>('docs');
+  const [currentView, setCurrentView] = useState<'dashboard' | 'docs' | 'students'>('dashboard');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
   const [activeTab, setActiveTab] = useState<'annual' | 'monthly'>('annual');
@@ -440,7 +441,24 @@ export default function App() {
       </div>
 
       <AnimatePresence mode="wait">
-        {currentView === 'students' ? (
+        {currentView === 'dashboard' ? (
+          <motion.main
+            key="dashboard"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="flex-1"
+          >
+            <Suspense fallback={<div className="flex items-center justify-center h-64"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>}>
+              <Dashboard
+                studentInfos={studentInfos}
+                paymentRecords={allPaymentRecords}
+                onNavigateToStudents={() => setCurrentView('students')}
+                onNavigateToDocs={() => setCurrentView('docs')}
+              />
+            </Suspense>
+          </motion.main>
+        ) : currentView === 'students' ? (
           <motion.main
             key="students"
             initial={{ opacity: 0, y: 10 }}
