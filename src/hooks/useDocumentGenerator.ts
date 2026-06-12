@@ -102,10 +102,10 @@ export function useDocumentGenerator(
             // API 키가 없는 경우에는 의도된 상황이므로 콘솔 경고를 억제합니다.
             if (aiError.message !== 'API_KEY_MISSING') {
               console.warn('AI generation failed, using mock data:', aiError);
-              showToast({
-                type: 'error',
-                message: 'AI 생성에 실패하여 기본 양식(Mock)으로 대체되었습니다.',
-              }, 4000);
+          showToast({
+            type: 'error',
+            message: 'AI 서버 연결에 실패하여 기본 양식으로 대체되었습니다. 네트워크 상태를 확인해 주세요.',
+          }, 5000);
             }
             
             if (!annual) annual = generateFallbackAnnualPlan();
@@ -161,8 +161,8 @@ export function useDocumentGenerator(
         console.error('Data loading error:', error);
         showToast({
           type: 'error',
-          message: '데이터를 불러오는 중 오류가 발생했습니다.',
-        }, 3000);
+          message: '데이터를 불러오는 중 오류가 발생했습니다. 네트워크 연결을 확인하고 다시 시도해 주세요.',
+        }, 5000);
       } finally {
         setIsLoading(false);
       }
@@ -229,7 +229,7 @@ export function useDocumentGenerator(
           showToast({ type: 'success', message: '가상 일지(Mock)가 생성되었습니다.' });
         } else {
           console.error('Draft generation failed:', error);
-          showToast({ type: 'error', message: '가상 일지 생성 중 오류가 발생했습니다.' });
+          showToast({ type: 'error', message: '가상 일지 생성 중 오류가 발생했습니다. 네트워크 연결을 확인해 주세요.' });
         }
       } finally {
         setIsLoading(false);
@@ -360,7 +360,7 @@ export function useDocumentGenerator(
         console.error('Batch generation failed:', error);
         showToast({
           type: 'error',
-          message: '일괄 생성 중 오류가 발생했습니다.',
+          message: '일괄 생성 중 오류가 발생했습니다. 네트워크 연결을 확인하고 다시 시도해 주세요.',
         });
       } finally {
         setIsLoading(false);

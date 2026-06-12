@@ -57,7 +57,7 @@ export function useStudents(): UseStudentsReturn {
         message: '학생 정보가 등록되었습니다.',
       });
     } catch (err) {
-      showToast({ type: 'error', message: '학생 정보 등록에 실패했습니다.' });
+      showToast({ type: 'error', message: '학생 정보 등록에 실패했습니다. 네트워크 연결을 확인해 주세요.' });
       handleFirestoreError(err, OperationType.CREATE, 'students');
     }
   };
@@ -75,7 +75,7 @@ export function useStudents(): UseStudentsReturn {
         message: '학생 정보가 수정되었습니다.',
       });
     } catch (err) {
-      showToast({ type: 'error', message: '학생 정보 수정에 실패했습니다.' });
+      showToast({ type: 'error', message: '학생 정보 수정에 실패했습니다. 네트워크 연결을 확인해 주세요.' });
       handleFirestoreError(err, OperationType.UPDATE, 'students');
     }
   };
@@ -89,7 +89,7 @@ export function useStudents(): UseStudentsReturn {
           message: '학생 정보가 삭제되었습니다.',
         });
       } catch (err) {
-        showToast({ type: 'error', message: '학생 정보 삭제에 실패했습니다.' });
+        showToast({ type: 'error', message: '학생 정보 삭제에 실패했습니다. 네트워크 연결을 확인해 주세요.' });
         handleFirestoreError(err, OperationType.DELETE, 'students');
       }
     }
@@ -168,7 +168,7 @@ export function useStudents(): UseStudentsReturn {
           message: '학생 정보가 등록되었습니다. [학생 정보 관리] 탭에서 나머지 정보를 수정해 주세요.',
         }, 5000);
       } catch (err) {
-        showToast({ type: 'error', message: '학생 자동 등록에 실패했습니다.' }, 5000);
+        showToast({ type: 'error', message: '학생 자동 등록에 실패했습니다. 네트워크 연결을 확인해 주세요.' }, 5000);
         handleFirestoreError(err, OperationType.CREATE, 'students');
       }
     }

@@ -26,13 +26,47 @@ export const StudentManagement: React.FC<Props> = ({ studentInfos, onAdd, onUpda
     observations: ''
   });
 
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const validateForm = (): boolean => {
+    const newErrors: Record<string, string> = {};
+
+    if (!formData.name.trim()) {
+      newErrors.name = '학생 이름을 입력해 주세요.';
+    } else if (formData.name.length > 50) {
+      newErrors.name = '이름은 50자 이내로 입력해 주세요.';
+    }
+
+    if (!formData.birthDate.trim()) {
+      newErrors.birthDate = '생년월일을 입력해 주세요.';
+    } else if (!/^\d{2,4}[.\-\/\s년]\d{1,2}[.\-\/\s월]\d{1,2}/.test(formData.birthDate)) {
+      newErrors.birthDate = '올바른 형식으로 입력해 주세요. (예: 13.01.10)';
+    }
+
+    if (!formData.school.trim()) {
+      newErrors.school = '소속 학교를 입력해 주세요.';
+    }
+
+    if (!formData.disabilityType) {
+      newErrors.disabilityType = '장애 유형을 선택해 주세요.';
+    }
+
+    if (!formData.therapistName.trim()) {
+      newErrors.therapistName = '담당 치료사 이름을 입력해 주세요.';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const filteredInfos = studentInfos.filter(info => 
     info.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.name) return;
+    
+    if (!validateForm()) return;
 
     if (editingName) {
       onUpdate(editingName, formData);
@@ -52,6 +86,7 @@ export const StudentManagement: React.FC<Props> = ({ studentInfos, onAdd, onUpda
       schedule: { day: '', time: '', frequency: '1' },
       observations: ''
     });
+    setErrors({});
   };
 
   const handleEdit = (info: StudentInfo) => {
@@ -72,6 +107,7 @@ export const StudentManagement: React.FC<Props> = ({ studentInfos, onAdd, onUpda
       therapistName: '',
       observations: ''
     });
+    setErrors({});
   };
 
   return (
@@ -234,8 +270,11 @@ export const StudentManagement: React.FC<Props> = ({ studentInfos, onAdd, onUpda
                       value={formData.name}
                       onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                       placeholder="이름 입력"
-                      className="w-full px-4 py-3 bg-bg-theme border border-border-theme rounded-2xl focus:border-primary outline-none transition-all font-medium"
+                      className={`w-full px-4 py-3 bg-bg-theme border rounded-2xl focus:border-primary outline-none transition-all font-medium ${
+                        errors.name ? 'border-red-500' : 'border-border-theme'
+                      }`}
                     />
+                    {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
                   </div>
                   <div className="space-y-2">
                     <label className="text-xs font-bold text-text-muted ml-1 uppercase tracking-wider">생년월일</label>
@@ -245,8 +284,11 @@ export const StudentManagement: React.FC<Props> = ({ studentInfos, onAdd, onUpda
                       value={formData.birthDate}
                       onChange={(e) => setFormData({ ...formData, birthDate: e.target.value })}
                       placeholder="13.01.10"
-                      className="w-full px-4 py-3 bg-bg-theme border border-border-theme rounded-2xl focus:border-primary outline-none transition-all font-medium"
+                      className={`w-full px-4 py-3 bg-bg-theme border rounded-2xl focus:border-primary outline-none transition-all font-medium ${
+                        errors.birthDate ? 'border-red-500' : 'border-border-theme'
+                      }`}
                     />
+                    {errors.birthDate && <p className="text-red-500 text-xs mt-1">{errors.birthDate}</p>}
                   </div>
                 </div>
 
@@ -258,8 +300,11 @@ export const StudentManagement: React.FC<Props> = ({ studentInfos, onAdd, onUpda
                     value={formData.school}
                     onChange={(e) => setFormData({ ...formData, school: e.target.value })}
                     placeholder="학교명 입력"
-                    className="w-full px-4 py-3 bg-bg-theme border border-border-theme rounded-2xl focus:border-primary outline-none transition-all font-medium"
+                    className={`w-full px-4 py-3 bg-bg-theme border rounded-2xl focus:border-primary outline-none transition-all font-medium ${
+                      errors.school ? 'border-red-500' : 'border-border-theme'
+                    }`}
                   />
+                  {errors.school && <p className="text-red-500 text-xs mt-1">{errors.school}</p>}
                 </div>
 
                 <div className="space-y-2">
@@ -268,7 +313,9 @@ export const StudentManagement: React.FC<Props> = ({ studentInfos, onAdd, onUpda
                     required
                     value={formData.disabilityType || ""}
                     onChange={(e) => setFormData({ ...formData, disabilityType: e.target.value })}
-                    className="w-full px-4 py-3 bg-bg-theme border border-border-theme rounded-2xl focus:border-primary outline-none transition-all font-medium cursor-pointer"
+                    className={`w-full px-4 py-3 bg-bg-theme border rounded-2xl focus:border-primary outline-none transition-all font-medium cursor-pointer ${
+                      errors.disabilityType ? 'border-red-500' : 'border-border-theme'
+                    }`}
                   >
                     <option value="" disabled>장애 유형 선택</option>
                     <option value="지적장애">지적장애</option>
@@ -278,6 +325,7 @@ export const StudentManagement: React.FC<Props> = ({ studentInfos, onAdd, onUpda
                     <option value="경계선지능">경계선지능</option>
                     <option value="기타">기타</option>
                   </select>
+                  {errors.disabilityType && <p className="text-red-500 text-xs mt-1">{errors.disabilityType}</p>}
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
@@ -303,8 +351,11 @@ export const StudentManagement: React.FC<Props> = ({ studentInfos, onAdd, onUpda
                       value={formData.therapistName}
                       onChange={(e) => setFormData({ ...formData, therapistName: e.target.value })}
                       placeholder="치료사 이름"
-                      className="w-full px-4 py-3 bg-bg-theme border border-border-theme rounded-2xl focus:border-primary outline-none transition-all font-medium"
+                      className={`w-full px-4 py-3 bg-bg-theme border rounded-2xl focus:border-primary outline-none transition-all font-medium ${
+                        errors.therapistName ? 'border-red-500' : 'border-border-theme'
+                      }`}
                     />
+                    {errors.therapistName && <p className="text-red-500 text-xs mt-1">{errors.therapistName}</p>}
                   </div>
                 </div>
 

@@ -59,7 +59,7 @@ export function usePayments(
         }
       },
       (err) => {
-        showToast({ type: 'error', message: '결제 내역을 불러오는데 실패했습니다.' }, 3000);
+        showToast({ type: 'error', message: '결제 내역을 불러오는데 실패했습니다. 네트워크 연결을 확인해 주세요.' }, 5000);
       }
     );
     return () => unsub();
@@ -122,7 +122,7 @@ export function usePayments(
       });
     } catch (err) {
       console.error(err);
-      showToast({ type: 'error', message: '결제 내역 저장에 실패했습니다.' });
+      showToast({ type: 'error', message: '결제 내역 저장에 실패했습니다. 데이터베이스 연결을 확인해 주세요.' });
     } finally {
       setIsLoading(false);
     }
@@ -174,10 +174,10 @@ export function usePayments(
       });
     } catch (err) {
       console.error('Reset failed:', err);
-      showToast({
-        type: 'error',
-        message: '데이터 초기화 중 오류가 발생했습니다.',
-      });
+        showToast({
+          type: 'error',
+          message: '데이터 초기화 중 오류가 발생했습니다. 네트워크 상태를 확인하고 다시 시도해 주세요.',
+        });
     } finally {
       setIsLoading(false);
     }

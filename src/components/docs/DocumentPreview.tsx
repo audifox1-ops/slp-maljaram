@@ -103,8 +103,10 @@ export const DocumentPreview: React.FC<DocumentPreviewProps> = ({
                     ? '해당 월의 치료 내역이 없습니다.'
                     : '서류 데이터를 생성할 수 없습니다.'}
                 </p>
-                <p className="text-sm">
-                  데이터 형식이 올바른지 확인해 주세요.
+                <p className="text-sm mt-2">
+                  {monthlyData && monthlyData.sessions.length === 0
+                    ? '이번 달에 해당하는 결제 내역이 없습니다. 결제 내역을 확인해 주세요.'
+                    : '데이터 형식이 올바른지 확인하거나, 상단의 "재작성" 버튼을 눌러 다시 생성해 보세요.'}
                 </p>
               </div>
             )}

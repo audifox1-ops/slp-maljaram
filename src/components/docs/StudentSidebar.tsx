@@ -149,7 +149,12 @@ export const StudentSidebar: React.FC<StudentSidebarProps> = ({
               <div className="w-12 h-12 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4 border border-slate-100">
                 <Search className="w-5 h-5 text-slate-300" />
               </div>
-              <p className="text-xs font-bold text-slate-400">학생을 찾을 수 없습니다</p>
+              <p className="text-xs font-bold text-slate-400">
+                {searchTerm ? '검색 결과가 없습니다' : '등록된 학생이 없습니다'}
+              </p>
+              <p className="text-[10px] text-slate-300 mt-1">
+                {searchTerm ? '다른 검색어를 시도해 보세요' : '상단의 "새 파일 업로드" 버튼으로 데이터를 등록해 주세요'}
+              </p>
             </motion.div>
           )}
         </AnimatePresence>
