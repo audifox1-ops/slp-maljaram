@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Plus, Edit2, Trash2, UserPlus, Save, X, Search, User, AlertCircle } from 'lucide-react';
+import React, { useState, useMemo } from 'react';
+import { Plus, Edit2, Trash2, UserPlus, Save, X, Search, User, AlertCircle, Calendar, ChevronRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { StudentInfo } from '../types';
 
@@ -62,6 +62,11 @@ export const StudentManagement: React.FC<Props> = ({ studentInfos, onAdd, onUpda
   const filteredInfos = studentInfos.filter(info => 
     info.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  // 치료 일정이 없는 학생 수 계산
+  const studentsWithoutSchedule = useMemo(() => {
+    return studentInfos.filter(info => !info.schedule?.day || !info.schedule?.time).length;
+  }, [studentInfos]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -145,6 +150,30 @@ export const StudentManagement: React.FC<Props> = ({ studentInfos, onAdd, onUpda
           </div>
 
           <div className="flex-1 overflow-auto p-6">
+            {/* 치료 일정 미입력 경고 배너 */}
+            {studentsWithoutSchedule > 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-2xl flex items-center gap-4"
+              >
+                <div className="flex-shrink-0 w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center">
+                  <Calendar className="w-5 h-5 text-amber-600" />
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm font-bold text-amber-800">
+                    치료 일정 미입력 학생: <span className="text-amber-600">{studentsWithoutSchedule}명</span>
+                  </p>
+                  <p className="text-xs text-amber-600 mt-0.5">
+                    치료 일정을 입력하면 스케줄 검증 및 서류 생성이 더 정확해집니다.
+                  </p>
+                </div>
+                <div className="text-xs text-amber-500 flex items-center gap-1">
+                  카드의 <Calendar className="w-3 h-3 inline" /> 버튼으로 빠르게 입력하세요
+                </div>
+              </motion.div>
+            )}
+
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               <AnimatePresence mode="popLayout">
                 {filteredInfos.map((info) => (
@@ -199,13 +228,61 @@ export const StudentManagement: React.FC<Props> = ({ studentInfos, onAdd, onUpda
                         <span className="text-text-muted">담당 치료사</span>
                         <span className="font-bold text-primary">{info.therapistName || '-'}</span>
                       </div>
-                      <div className="flex justify-between">
-                        <span className="text-text-muted">치료 일정</span>
-                        <span className="font-semibold text-right">
-                          {info.schedule?.day && info.schedule?.time 
-                            ? `${info.schedule.day} ${info.schedule.time} (${info.schedule.frequency}회)`
-                            : <span className="text-amber-500 flex items-center gap-1 justify-end"><AlertCircle className="w-3 h-3"/>입력 필요</span>}
-                        </span>
+                      
+                      {/* 치료 일정 - 강조 표시 */}
+                      <div className={`mt-3 p-3 rounded-xl ${
+                        info.schedule?.day && info.schedule?.time 
+                          ? 'bg-slate-50 border border-slate-100' 
+                          : 'bg-amber-50 border border-amber-200'
+                      }`}>
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <Calendar className={`w-4 h-4 ${
+                              info.schedule?.day && info.schedule?.time 
+                                ? 'text-slate-400' 
+                                : 'text-amber-500'
+                            }`} />
+                            <span className={`text-xs font-bold ${
+                              info.schedule?.day && info.schedule?.time 
+                                ? 'text-slate-600' 
+                                : 'text-amber-700'
+                            }`}>
+                              치료 일정
+                            </span>
+                          </div>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleEdit(info);
+                            }}
+                            className={`text-xs font-bold flex items-center gap-1 px-2 py-1 rounded-lg transition-colors ${
+                              info.schedule?.day && info.schedule?.time 
+                                ? 'text-slate-500 hover:bg-slate-100' 
+                                : 'text-amber-600 hover:bg-amber-100'
+                            }`}
+                          >
+                            {info.schedule?.day && info.schedule?.time ? (
+                              <>
+                                <Edit2 className="w-3 h-3" />
+                                수정
+                              </>
+                            ) : (
+                              <>
+                                <ChevronRight className="w-3 h-3" />
+                                입력하기
+                              </>
+                            )}
+                          </button>
+                        </div>
+                        {info.schedule?.day && info.schedule?.time ? (
+                          <p className="text-sm font-semibold text-text-main mt-1">
+                            {info.schedule.day} {info.schedule.time} <span className="text-text-muted">({info.schedule.frequency}회/주)</span>
+                          </p>
+                        ) : (
+                          <p className="text-xs text-amber-600 mt-1">
+                            치료 요일과 시간을 입력해 주세요
+                          </p>
+                        )}
                       </div>
                       {info.observations && (
                         <div className="mt-2 text-[10px] text-text-muted bg-bg-theme/50 p-2 rounded-lg line-clamp-2 italic">
@@ -362,6 +439,41 @@ export const StudentManagement: React.FC<Props> = ({ studentInfos, onAdd, onUpda
                 {/* 치료 일정 */}
                 <div className="space-y-2">
                   <label className="text-xs font-bold text-text-muted ml-1 uppercase tracking-wider">치료 일정</label>
+                  
+                  {/* 빠른 설정 버튼 */}
+                  <div className="flex flex-wrap gap-2 mb-3">
+                    <button
+                      type="button"
+                      onClick={() => setFormData({ 
+                        ...formData, 
+                        schedule: { day: '화, 목', time: '14:00~14:50', frequency: '2' } 
+                      })}
+                      className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-medium rounded-lg transition-colors"
+                    >
+                      화,목 14:00
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setFormData({ 
+                        ...formData, 
+                        schedule: { day: '월, 수', time: '10:00~10:50', frequency: '2' } 
+                      })}
+                      className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-medium rounded-lg transition-colors"
+                    >
+                      월,수 10:00
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setFormData({ 
+                        ...formData, 
+                        schedule: { day: '매주 월', time: '15:00~15:50', frequency: '1' } 
+                      })}
+                      className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-medium rounded-lg transition-colors"
+                    >
+                      매주 월 15:00
+                    </button>
+                  </div>
+
                   <div className="grid grid-cols-3 gap-3">
                     <div className="space-y-1">
                       <p className="text-[10px] text-text-muted ml-1">요일</p>
