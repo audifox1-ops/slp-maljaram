@@ -5,6 +5,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { PaymentRecord, RawRecord } from '../types';
 import { useToast } from './useToast';
+import { useConfirm } from './useConfirm';
 import { db, OperationType, handleFirestoreError } from '../firebase';
 import {
   collection,
@@ -30,6 +31,7 @@ export function usePayments(
   setIsLoading: (loading: boolean) => void
 ): UsePaymentsReturn {
   const { showToast } = useToast();
+  const { confirm } = useConfirm();
   const [allPaymentRecords, setAllPaymentRecords] = useState<PaymentRecord[]>([]);
   const hasInitialLoaded = useRef(false);
 
@@ -129,12 +131,13 @@ export function usePayments(
   };
 
   const resetAllData = async () => {
-    if (
-      !window.confirm(
-        '정말 모든 데이터를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.'
-      )
-    )
-      return;
+    const ok = await confirm({
+      title: '전체 데이터 삭제',
+      message: '정말 모든 데이터를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.',
+      confirmText: '삭제',
+      variant: 'danger',
+    });
+    if (!ok) return;
 
     setIsLoading(true);
     try {

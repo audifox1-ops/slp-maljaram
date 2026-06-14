@@ -3,6 +3,7 @@ import { Edit2, Save, X, FileDown, RefreshCw } from 'lucide-react';
 import { Student, MonthlyJournalData } from '../types';
 import { TemplateSettings, loadTemplateSettings } from '../services/templateService';
 import { downloadMonthlyJournalAsHWPX } from '../services/hwpxExportService';
+import { useConfirm } from '../hooks/useConfirm';
 
 interface Props {
   student: Student;
@@ -18,6 +19,7 @@ export const MonthlyJournal: React.FC<Props> = ({ student, data, month, year, te
   const [isEditing, setIsEditing] = useState(false);
   const [editedData, setEditedData] = useState<MonthlyJournalData>(data);
   const settings = propSettings || loadTemplateSettings();
+  const { confirm } = useConfirm();
 
   useEffect(() => {
     setEditedData(data);
@@ -81,10 +83,14 @@ export const MonthlyJournal: React.FC<Props> = ({ student, data, month, year, te
         </button>
         {onRegenerate && !isEditing && (
           <button
-            onClick={() => {
-              if (window.confirm('기존 데이터가 삭제되고 새로 작성됩니다. 계속하시겠습니까?')) {
-                onRegenerate();
-              }
+            onClick={async () => {
+              const ok = await confirm({
+                title: '월별 일지 재작성',
+                message: '기존 데이터가 삭제되고 새로 작성됩니다. 계속하시겠습니까?',
+                confirmText: '재작성',
+                variant: 'warning',
+              });
+              if (ok) onRegenerate();
             }}
             className="flex items-center gap-1 px-3 py-1.5 bg-orange-50 text-orange-600 rounded-lg hover:bg-orange-100 transition-colors text-sm font-bold border border-orange-200"
             title="개별 치료 일지 새로 작성"

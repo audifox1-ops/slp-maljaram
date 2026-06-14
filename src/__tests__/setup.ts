@@ -28,6 +28,14 @@ vi.mock('@google/genai', () => ({
   GoogleGenAI: vi.fn(),
 }));
 
+// Mock useConfirm
+vi.mock('../hooks/useConfirm', () => ({
+  useConfirm: () => ({
+    confirm: vi.fn().mockResolvedValue(true),
+    ConfirmDialog: () => null,
+  }),
+}));
+
 // Mock window.confirm
 Object.defineProperty(window, 'confirm', {
   writable: true,

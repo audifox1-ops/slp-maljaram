@@ -5,6 +5,7 @@
 import { useState, useEffect } from 'react';
 import { StudentInfo, RawRecord } from '../types';
 import { useToast } from './useToast';
+import { useConfirm } from './useConfirm';
 import { db, OperationType, handleFirestoreError } from '../firebase';
 import {
   collection,
@@ -24,6 +25,7 @@ interface UseStudentsReturn {
 
 export function useStudents(): UseStudentsReturn {
   const { showToast } = useToast();
+  const { confirm } = useConfirm();
   const [studentInfos, setStudentInfos] = useState<StudentInfo[]>([]);
 
   // Firestore 실시간 구독
@@ -81,17 +83,22 @@ export function useStudents(): UseStudentsReturn {
   };
 
   const deleteStudent = async (name: string) => {
-    if (window.confirm(`${name} 학생의 정보를 삭제하시겠습니까?`)) {
-      try {
-        await deleteDoc(doc(db, 'students', name));
-        showToast({
-          type: 'success',
-          message: '학생 정보가 삭제되었습니다.',
-        });
-      } catch (err) {
-        showToast({ type: 'error', message: '학생 정보 삭제에 실패했습니다. 네트워크 연결을 확인해 주세요.' });
-        handleFirestoreError(err, OperationType.DELETE, 'students');
-      }
+    const ok = await confirm({
+      title: '학생 삭제',
+      message: `${name} 학생의 정보를 삭제하시겠습니까?`,
+      confirmText: '삭제',
+      variant: 'danger',
+    });
+    if (!ok) return;
+    try {
+      await deleteDoc(doc(db, 'students', name));
+      showToast({
+        type: 'success',
+        message: '학생 정보가 삭제되었습니다.',
+      });
+    } catch (err) {
+      showToast({ type: 'error', message: '학생 정보 삭제에 실패했습니다. 네트워크 연결을 확인해 주세요.' });
+      handleFirestoreError(err, OperationType.DELETE, 'students');
     }
   };
 

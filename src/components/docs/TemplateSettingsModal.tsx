@@ -11,6 +11,7 @@ import {
   saveTemplateSettings, 
   resetTemplateSettings 
 } from '../../services/templateService';
+import { useConfirm } from '../../hooks/useConfirm';
 
 interface TemplateSettingsModalProps {
   isOpen: boolean;
@@ -25,6 +26,7 @@ export const TemplateSettingsModal: React.FC<TemplateSettingsModalProps> = ({
 }) => {
   const [settings, setSettings] = useState<TemplateSettings>(loadTemplateSettings());
   const [hasChanges, setHasChanges] = useState(false);
+  const { confirm } = useConfirm();
 
   useEffect(() => {
     if (isOpen) {
@@ -45,8 +47,14 @@ export const TemplateSettingsModal: React.FC<TemplateSettingsModalProps> = ({
     onClose();
   };
 
-  const handleReset = () => {
-    if (window.confirm('템플릿 설정을 기본값으로 초기화하시겠습니까?')) {
+  const handleReset = async () => {
+    const ok = await confirm({
+      title: '설정 초기화',
+      message: '템플릿 설정을 기본값으로 초기화하시겠습니까?',
+      confirmText: '초기화',
+      variant: 'warning',
+    });
+    if (ok) {
       const defaultSettings = resetTemplateSettings();
       setSettings(defaultSettings);
       setHasChanges(true);
