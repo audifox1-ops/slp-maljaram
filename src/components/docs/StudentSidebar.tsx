@@ -70,9 +70,9 @@ export const StudentSidebar: React.FC<StudentSidebarProps> = ({
           )}
         </div>
         <div id="student-count" className="mt-5 flex items-center justify-between text-[11px] font-black text-text-muted/60 uppercase tracking-[0.1em] px-1">
-          <span>Student Directory</span>
+          <span>학생 목록</span>
           <span className="bg-primary/5 text-primary px-3 py-1 rounded-full border border-primary/10" aria-live="polite">
-            {filteredStudents.length} Profiles
+            {filteredStudents.length}명
           </span>
         </div>
 
@@ -152,9 +152,9 @@ export const StudentSidebar: React.FC<StudentSidebarProps> = ({
                         e.stopPropagation();
                         onAutoRegister(name);
                       }}
-                      className="px-2.5 py-1 bg-accent/10 text-accent text-[9px] font-black rounded-lg hover:bg-accent hover:text-white transition-all uppercase tracking-wider"
+                      className="px-2.5 py-1 bg-accent/10 text-accent text-[9px] font-black rounded-lg hover:bg-accent hover:text-white transition-all"
                     >
-                      New
+                      신규
                     </motion.button>
                   )}
                   {selectedStudent?.name === name && (
@@ -194,7 +194,7 @@ export const StudentSidebar: React.FC<StudentSidebarProps> = ({
           className="w-full flex items-center justify-center gap-2 py-3 text-[11px] font-black text-slate-400 hover:text-red-500 hover:bg-red-50/50 rounded-xl transition-all border border-transparent hover:border-red-100/50"
         >
           <Trash2 className="w-3.5 h-3.5" aria-hidden="true" />
-          Clear All Data
+          모든 데이터 삭제
         </button>
       </div>
     </aside>

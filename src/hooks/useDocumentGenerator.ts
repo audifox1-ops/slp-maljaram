@@ -13,6 +13,19 @@ import {
   generateFallbackAnnualPlan,
 } from '../services/mockDataService';
 
+function createMockMonthly(dates: string[], treatmentArea: string, monthlyGoal: string): MonthlyJournalData {
+  return {
+    currentLevel: '현재 치료 목표에 따른 활동을 수행 중임.',
+    monthlyGoal,
+    sessions: generateMockSessions(dates, treatmentArea, monthlyGoal),
+    result: '긍정적인 변화가 관찰되며 지속적인 지도가 필요함.',
+  };
+}
+
+function getVirtualDates(year: number, month: number): string[] {
+  return [1, 8, 15, 22].map(d => `${year}-${String(month).padStart(2, '0')}-${String(d).padStart(2, '0')}`);
+}
+
 interface UseDocumentGeneratorReturn {
   annualData: AnnualPlanData | null;
   monthlyData: MonthlyJournalData | null;
@@ -115,16 +128,7 @@ export function useDocumentGenerator(
               '연간계획서에 목표가 설정되지 않았습니다.';
 
             if (!monthly) {
-              monthly = {
-                currentLevel: '현재 치료 목표에 따른 활동을 수행 중임.',
-                monthlyGoal,
-                sessions: generateMockSessions(
-                  filteredDates,
-                  student.treatmentArea,
-                  monthlyGoal
-                ),
-                result: '긍정적인 변화가 관찰되며 지속적인 지도가 필요함.',
-              };
+              monthly = createMockMonthly(filteredDates, student.treatmentArea, monthlyGoal);
             }
           }
         }
@@ -214,17 +218,7 @@ export function useDocumentGenerator(
       } catch (error: any) {
         if (error.message === 'API_KEY_MISSING') {
           // 가상 일지 생성 시 키가 없으면 Mock 데이터로 즉시 생성
-          const virtualDates = [];
-          for (let i = 1; i <= 4; i++) {
-            const day = 7 * i - 3;
-            virtualDates.push(`${selectedYear}-${String(selectedMonth).padStart(2, '0')}-${String(day).padStart(2, '0')}`);
-          }
-          const monthly = {
-            currentLevel: '가상 치료 세션을 통한 초기 평가 진행 중임.',
-            monthlyGoal: '목표 미설정 (가상)',
-            sessions: generateMockSessions(virtualDates, student.treatmentArea, '목표 미설정 (가상)'),
-            result: '가상 데이터를 기반으로 한 분석 결과임.'
-          };
+          const monthly = createMockMonthly(getVirtualDates(selectedYear, selectedMonth), student.treatmentArea, '목표 미설정 (가상)');
           setMonthlyData(monthly);
           showToast({ type: 'success', message: '가상 일지(Mock)가 생성되었습니다.' });
         } else {
@@ -318,29 +312,15 @@ export function useDocumentGenerator(
               monthly = await generateMonthlyJournal(studentWithDates, m, monthlyGoal);
             } else {
               // 결제 내역 없으면 가상 날짜로 Mock 처리
-              monthly = {
-                currentLevel: '현재 치료 목표에 따른 활동을 수행 중임.',
-                monthlyGoal,
-                sessions: generateMockSessions(
-                  [1, 8, 15, 22].map(d => `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`),
-                  student.treatmentArea,
-                  monthlyGoal
-                ),
-                result: '긍정적인 변화가 관찰되며 지속적인 지도가 필요함.',
-              };
+              monthly = createMockMonthly(getVirtualDates(y, m), student.treatmentArea, monthlyGoal);
             }
           } catch (aiError: any) {
             // API 키가 없거나 기타 에러 발생 시 Mock으로 폴백 (배치 모드에서는 조용히 처리)
-            monthly = {
-              currentLevel: '현재 치료 목표에 따른 활동을 수행 중임.',
-              monthlyGoal,
-              sessions: generateMockSessions(
-                filteredDates.length > 0 ? filteredDates : [1, 8, 15, 22].map(d => `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`),
-                student.treatmentArea,
-                monthlyGoal
-              ),
-              result: '긍정적인 변화가 관찰되며 지속적인 지도가 필요함.',
-            };
+            monthly = createMockMonthly(
+              filteredDates.length > 0 ? filteredDates : getVirtualDates(y, m),
+              student.treatmentArea,
+              monthlyGoal
+            );
           }
 
           // 저장
@@ -407,16 +387,7 @@ export function useDocumentGenerator(
         if (filteredDates.length > 0) {
           monthly = await generateMonthlyJournal(studentWithDates, selectedMonth, monthlyGoal);
         } else {
-          monthly = {
-            currentLevel: '현재 치료 목표에 따른 활동을 수행 중임.',
-            monthlyGoal,
-            sessions: generateMockSessions(
-              [1, 8, 15, 22].map(d => `${selectedYear}-${String(selectedMonth).padStart(2, '0')}-${String(d).padStart(2, '0')}`),
-              student.treatmentArea,
-              monthlyGoal
-            ),
-            result: '긍정적인 변화가 관찰되며 지속적인 지도가 필요함.',
-          };
+          monthly = createMockMonthly(getVirtualDates(selectedYear, selectedMonth), student.treatmentArea, monthlyGoal);
         }
         
         await saveMonthlyJournal(student.name, selectedYear, selectedMonth, monthly);
@@ -428,16 +399,11 @@ export function useDocumentGenerator(
         const monthlyGoal = currentAnnual.monthlyGoals.find((g) => g.month === selectedMonth)?.goal || '목표 미설정';
         const filteredDates = filterDatesByYearMonth(student.paymentDates, selectedYear, selectedMonth);
         
-        const fallbackMonthly: MonthlyJournalData = {
-          currentLevel: '현재 치료 목표에 따른 활동을 수행 중임.',
-          monthlyGoal,
-          sessions: generateMockSessions(
-            filteredDates.length > 0 ? filteredDates : [1, 8, 15, 22].map(d => `${selectedYear}-${String(selectedMonth).padStart(2, '0')}-${String(d).padStart(2, '0')}`),
-            student.treatmentArea,
-            monthlyGoal
-          ),
-          result: '긍정적인 변화가 관찰되며 지속적인 지도가 필요함.',
-        };
+        const fallbackMonthly = createMockMonthly(
+          filteredDates.length > 0 ? filteredDates : getVirtualDates(selectedYear, selectedMonth),
+          student.treatmentArea,
+          monthlyGoal
+        );
         
         await saveMonthlyJournal(student.name, selectedYear, selectedMonth, fallbackMonthly);
         setMonthlyData(fallbackMonthly);

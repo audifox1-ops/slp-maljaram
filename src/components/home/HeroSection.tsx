@@ -26,7 +26,7 @@ export const HeroSection: React.FC = () => {
           transition={{ delay: 0.2, duration: 0.5 }}
           className="inline-block px-5 py-2 mb-8 text-xs font-black tracking-widest text-primary bg-white shadow-xl shadow-primary/5 rounded-full border border-primary/10 uppercase"
         >
-          ✨ AI-Powered SLP Automation
+          ✨ AI 기반 전문 치료 서류 자동화
         </motion.div>
         
         <h1 className="text-5xl md:text-7xl font-black text-text-main mb-8 tracking-tight leading-[1.05]">
@@ -66,8 +66,8 @@ export const HeroSection: React.FC = () => {
               <div className="w-3 h-3 rounded-full bg-green-500 animate-pulse" />
             </div>
             <div>
-              <p className="text-[10px] font-bold text-slate-400 uppercase">Analysis Status</p>
-              <p className="text-sm font-black text-slate-800">100% Completed</p>
+              <p className="text-[10px] font-bold text-slate-400 uppercase">분석 상태</p>
+              <p className="text-sm font-black text-slate-800">100% 완료</p>
             </div>
           </div>
         </motion.div>

@@ -110,6 +110,7 @@ export const StudentManagement: React.FC<Props> = ({ studentInfos, onAdd, onUpda
       disabilityType: '',
       treatmentArea: '언어치료',
       therapistName: '',
+      schedule: { day: '', time: '', frequency: '1' },
       observations: ''
     });
     setErrors({});

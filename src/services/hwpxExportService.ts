@@ -63,7 +63,6 @@ export async function downloadAnnualPlanAsHWPX(
     saveAs(content, `${student.name}_${year}년_연간계획서.hwpx`);
   } catch (error) {
     console.error('HWPX export failed:', error);
-    alert(error instanceof Error ? error.message : 'HWPX 내보내기 중 오류가 발생했습니다.');
     throw error;
   }
 }
@@ -129,7 +128,6 @@ export async function downloadMonthlyJournalAsHWPX(
     saveAs(content, `${student.name}_${year}년_${month}월_치료일지.hwpx`);
   } catch (error) {
     console.error('HWPX export failed:', error);
-    alert(error instanceof Error ? error.message : 'HWPX 내보내기 중 오류가 발생했습니다.');
     throw error;
   }
 }
