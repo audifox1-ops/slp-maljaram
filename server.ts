@@ -32,6 +32,32 @@ async function startServer() {
     res.json({ status: "ok" });
   });
 
+  // Gemini API 프록시 (API 키를 서버 측에서 관리)
+  app.post("/api/generate", async (req, res) => {
+    const apiKey = process.env.GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY;
+    if (!apiKey) {
+      res.status(500).json({ error: 'GEMINI_API_KEY가 설정되지 않았습니다.' });
+      return;
+    }
+
+    try {
+      const { model, contents, config } = req.body;
+      const response = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ contents, generationConfig: config }),
+        }
+      );
+      const data = await response.json();
+      res.json(data);
+    } catch (error) {
+      console.error('Gemini API proxy error:', error);
+      res.status(500).json({ error: 'AI 서버 요청 중 오류가 발생했습니다.' });
+    }
+  });
+
   // Vite middleware for development
   const isProd = process.env.NODE_ENV === 'production';
   const distPath = path.join(process.cwd(), 'dist');

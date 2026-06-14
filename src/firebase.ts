@@ -2,27 +2,42 @@ import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 
-// 환경 변수 설정
-const ENV_PROJECT_ID = import.meta.env.VITE_FIREBASE_PROJECT_ID;
-const ENV_DATABASE_ID = import.meta.env.VITE_FIREBASE_DATABASE_ID;
+// 필수 환경 변수 검증
+const requiredEnvVars = {
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+} as const;
 
-// "slp-docs"는 프로젝트 이름일 뿐 데이터베이스 ID로는 부적절하므로 배제합니다.
-const isInvalidDbId = (id: string | undefined) => !id || id === 'slp-docs' || id === '';
+// 개발 환경에서만 경고 표시
+const missingVars = Object.entries(requiredEnvVars)
+  .filter(([, v]) => !v)
+  .map(([k]) => `VITE_FIREBASE_${k.toUpperCase()}`);
+
+if (missingVars.length > 0 && import.meta.env.DEV) {
+  console.warn(
+    `%c[Firebase] 필수 환경 변수가 설정되지 않았습니다: ${missingVars.join(', ')}`,
+    'color: #f59e0b; font-weight: bold;'
+  );
+  console.warn('[Firebase] .env 파일을 확인해 주세요. .env.example을 참고하세요.');
+}
 
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "AIzaSyAPc36awDxHcFuzQTW_sNvbvJTliF48acQ",
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "gen-lang-client-0159907695.firebaseapp.com",
-  projectId: (ENV_PROJECT_ID && ENV_PROJECT_ID !== 'slp-docs') ? ENV_PROJECT_ID : "gen-lang-client-0159907695",
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || "gen-lang-client-0159907695.firebasestorage.app",
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "420938473723",
-  appId: import.meta.env.VITE_FIREBASE_APP_ID || "1:420938473723:web:41a59d5b4fa8e77696505e",
-  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID || "",
-  firestoreDatabaseId: "ai-studio-f6c3d59c-c8ab-4ba0-973b-32245977679a",
+  apiKey: requiredEnvVars.apiKey || '',
+  authDomain: requiredEnvVars.authDomain || '',
+  projectId: requiredEnvVars.projectId || '',
+  storageBucket: requiredEnvVars.storageBucket || '',
+  messagingSenderId: requiredEnvVars.messagingSenderId || '',
+  appId: requiredEnvVars.appId || '',
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID || '',
+  firestoreDatabaseId: import.meta.env.VITE_FIREBASE_DATABASE_ID || '(default)',
 };
 
-
 const app = initializeApp(firebaseConfig);
-export const db = getFirestore(app, firebaseConfig.firestoreDatabaseId || '(default)');
+export const db = getFirestore(app, firebaseConfig.firestoreDatabaseId);
 export const auth = getAuth(app);
 
 export enum OperationType {
@@ -38,26 +53,15 @@ export interface FirestoreErrorInfo {
   error: string;
   operationType: OperationType;
   path: string | null;
-  authInfo: {
-    userId: string | undefined;
-    email: string | null | undefined;
-    emailVerified: boolean | undefined;
-    isAnonymous: boolean | undefined;
-  }
 }
 
 export function handleFirestoreError(error: unknown, operationType: OperationType, path: string | null) {
+  const errorMessage = error instanceof Error ? error.message : String(error);
   const errInfo: FirestoreErrorInfo = {
-    error: error instanceof Error ? error.message : String(error),
-    authInfo: {
-      userId: auth.currentUser?.uid,
-      email: auth.currentUser?.email,
-      emailVerified: auth.currentUser?.emailVerified,
-      isAnonymous: auth.currentUser?.isAnonymous,
-    },
+    error: errorMessage,
     operationType,
-    path
+    path,
   };
-  console.error('Firestore Error: ', JSON.stringify(errInfo));
-  throw new Error(JSON.stringify(errInfo));
+  console.error('Firestore Error:', JSON.stringify(errInfo));
+  throw new Error(errorMessage);
 }

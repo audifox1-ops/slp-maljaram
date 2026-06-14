@@ -4,7 +4,25 @@ dist/
 coverage/
 .DS_Store
 *.log
-.env*
+
+# 환경 변수 파일 (API 키, 시크릿)
+.env
+.env.*
 !.env.example
-.vercel
 .env*.local
+
+# Vercel
+.vercel
+
+# 개발 유틸리티
+temp_gen_hwpx.js
+scripts/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+Thumbs.db
