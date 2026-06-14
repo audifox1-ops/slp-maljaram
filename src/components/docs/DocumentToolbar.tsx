@@ -5,6 +5,7 @@
 import React from 'react';
 import { Calendar, Download, Printer, Sparkles } from 'lucide-react';
 import { Student, MonthlyJournalData } from '../../types';
+import { HelpTooltip } from '../common/Tooltip';
 
 interface DocumentToolbarProps {
   selectedStudent: Student;
@@ -141,25 +142,31 @@ export const DocumentToolbar: React.FC<DocumentToolbarProps> = ({
 
         {/* 기간별 일괄 생성 (월별일지 탭에서 항상 표시) */}
         {activeTab === 'monthly' && (
-          <button
-            onClick={onOpenBatchModal}
-            className="flex items-center gap-2 px-6 py-2.5 bg-indigo-500 text-white rounded-xl font-bold text-sm hover:bg-indigo-600 transition-all shadow-lg shadow-indigo-500/20"
-          >
-            <Sparkles className="w-4 h-4" />
-            기간별 일괄 생성
-          </button>
+          <div className="flex items-center">
+            <button
+              onClick={onOpenBatchModal}
+              className="flex items-center gap-2 px-6 py-2.5 bg-indigo-500 text-white rounded-xl font-bold text-sm hover:bg-indigo-600 transition-all shadow-lg shadow-indigo-500/20"
+            >
+              <Sparkles className="w-4 h-4" />
+              기간별 일괄 생성
+            </button>
+            <HelpTooltip content="지정한 기간 동안의 월별일지를 한 번에 자동 생성합니다." />
+          </div>
         )}
 
         {/* 가상 일지 생성 (월별일지 탭 + 세션이 없을 때만 표시) */}
         {activeTab === 'monthly' &&
           (!monthlyData || monthlyData.sessions.length === 0) && (
-            <button
-              onClick={onGenerateDraft}
-              className="flex items-center gap-2 px-6 py-2.5 bg-amber-500 text-white rounded-xl font-bold text-sm hover:bg-amber-600 transition-all shadow-lg shadow-amber-500/20"
-            >
-              <Sparkles className="w-4 h-4" />
-              가상 일지 생성
-            </button>
+            <div className="flex items-center">
+              <button
+                onClick={onGenerateDraft}
+                className="flex items-center gap-2 px-6 py-2.5 bg-amber-500 text-white rounded-xl font-bold text-sm hover:bg-amber-600 transition-all shadow-lg shadow-amber-500/20"
+              >
+                <Sparkles className="w-4 h-4" />
+                가상 일지 생성
+              </button>
+              <HelpTooltip content="결제 데이터가 없을 때 AI가 가상의 치료 일지를 생성합니다." />
+            </div>
           )}
       </div>
     </div>

@@ -205,15 +205,15 @@ function getStepMiniIcon(stepId: string) {
 function getStepHint(stepId: string) {
   switch (stepId) {
     case 'welcome':
-      return '治療書類作成を始めましょう';
+      return '치료 서류 작성을 시작하세요';
     case 'upload':
-      return 'CSVまたはExcelファイルをドラッグ&ドロップ';
+      return 'CSV 또는 Excel 파일을 드래그하거나 클릭하세요';
     case 'students':
-      return '左側のリストから学生を選択';
+      return '좌측 목록에서 학생을 선택하세요';
     case 'generate':
-      return 'AIが自動的に書類を作成';
+      return 'AI가 자동으로 서류를 작성합니다';
     case 'complete':
-      return '準備完了！';
+      return '준비 완료!';
     default:
       return '';
   }

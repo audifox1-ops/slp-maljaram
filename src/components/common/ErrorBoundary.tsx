@@ -41,9 +41,12 @@ export class ErrorBoundary extends React.Component<Props, State> {
             <div className="w-16 h-16 bg-red-100 text-red-500 rounded-2xl flex items-center justify-center mx-auto mb-6">
               <AlertTriangle className="w-8 h-8" />
             </div>
-            <h1 className="text-2xl font-bold text-text-main mb-3">예기치 않은 오류 발생</h1>
-            <p className="text-text-muted mb-6 line-clamp-3 text-sm">
-              {this.state.error?.message || "앱 실행 중 문제가 발생했습니다."}
+            <h1 className="text-2xl font-bold text-text-main mb-3">일시적인 오류가 발생했습니다</h1>
+            <p className="text-text-muted mb-2 line-clamp-3 text-sm">
+              앱 실행 중 예상치 못한 문제가 발생했습니다.
+            </p>
+            <p className="text-text-muted mb-6 text-xs">
+              문제가 지속되면 페이지를 새로고침하거나 브라우저를 재시작해 주세요.
             </p>
             <button
               onClick={this.handleReset}

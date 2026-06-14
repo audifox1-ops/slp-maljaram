@@ -61,6 +61,7 @@ export default function App() {
   const [isTemplateModalOpen, setIsTemplateModalOpen] = useState(false);
   const [templateSettings, setTemplateSettings] = useState<TemplateSettings>(loadTemplateSettings());
   const [isOnboardingOpen, setIsOnboardingOpen] = useState(!isOnboardingCompleted());
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const { showToast } = useToast();
 
@@ -511,9 +512,19 @@ export default function App() {
               onAutoRegister={handleAutoRegister}
               onResetAllData={resetAllData}
               paymentDatesByStudent={paymentDatesByStudent}
+              isOpen={isSidebarOpen}
+              onClose={() => setIsSidebarOpen(false)}
             />
 
             <div className="flex-1 flex flex-col p-6 md:p-10 gap-8 overflow-auto">
+              {/* 모바일 사이드바 토글 버튼 */}
+              <button
+                onClick={() => setIsSidebarOpen(true)}
+                className="md:hidden flex items-center gap-2 px-4 py-2 bg-white border border-border-theme rounded-xl text-sm font-bold text-text-main shadow-sm self-start"
+              >
+                <Users className="w-4 h-4" />
+                학생 목록
+              </button>
               <AnimatePresence mode="wait">
                 {selectedStudent ? (
                   <motion.div
@@ -557,6 +568,7 @@ export default function App() {
                         isLoading={isAnyLoading}
                         selectedYear={selectedYear}
                         selectedMonth={selectedMonth}
+                        templateSettings={templateSettings}
                         onSaveAnnual={(data) => selectedStudent && saveAnnualData(selectedStudent, data)}
                         onSaveMonthly={(data) => selectedStudent && saveMonthlyData(selectedStudent, data)}
                         onRegenerateAnnual={() => selectedStudent && regenerateAnnualData(selectedStudent)}

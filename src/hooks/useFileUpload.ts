@@ -26,6 +26,12 @@ export function useFileUpload(
 
   const processFile = useCallback(
     async (file: File) => {
+      const MAX_SIZE = 10 * 1024 * 1024;
+      if (file.size > MAX_SIZE) {
+        showToast({ type: 'error', message: `파일 크기가 너무 큽니다 (${Math.round(file.size / 1024 / 1024)}MB). 10MB 이하의 파일을 사용해 주세요.` }, 5000);
+        return;
+      }
+
       const result = await parseFile(file);
 
       if (result.success === false) {

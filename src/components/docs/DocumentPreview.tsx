@@ -6,6 +6,7 @@ import React from 'react';
 import { FileText, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Student, AnnualPlanData, MonthlyJournalData } from '../../types';
+import { TemplateSettings } from '../../services/templateService';
 import { AnnualPlan } from '../AnnualPlan';
 import { MonthlyJournal } from '../MonthlyJournal';
 import { LoadingOverlay } from '../common/LoadingOverlay';
@@ -18,6 +19,7 @@ interface DocumentPreviewProps {
   isLoading: boolean;
   selectedYear: number;
   selectedMonth: number;
+  templateSettings?: TemplateSettings;
   onSaveAnnual?: (data: AnnualPlanData) => void;
   onSaveMonthly?: (data: MonthlyJournalData) => void;
   onRegenerateAnnual?: () => void;
@@ -32,6 +34,7 @@ export const DocumentPreview: React.FC<DocumentPreviewProps> = ({
   isLoading,
   selectedYear,
   selectedMonth,
+  templateSettings,
   onSaveAnnual,
   onSaveMonthly,
   onRegenerateAnnual,
@@ -81,6 +84,7 @@ export const DocumentPreview: React.FC<DocumentPreviewProps> = ({
                 student={selectedStudent}
                 data={annualData}
                 year={selectedYear}
+                templateSettings={templateSettings}
                 onSave={onSaveAnnual}
                 onRegenerate={onRegenerateAnnual}
               />
@@ -92,6 +96,7 @@ export const DocumentPreview: React.FC<DocumentPreviewProps> = ({
                 data={monthlyData}
                 month={selectedMonth}
                 year={selectedYear}
+                templateSettings={templateSettings}
                 onSave={onSaveMonthly}
                 onRegenerate={onRegenerateMonthly}
               />

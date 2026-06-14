@@ -51,10 +51,8 @@ async function executeWithRetry<T>(
 }
 function safeJsonParse(text: string) {
   try {
-    // Attempt direct parse
     return JSON.parse(text);
   } catch (e) {
-    // If it fails, try to extract JSON from markdown blocks
     const jsonMatch = text.match(/```json\s?([\s\S]*?)\s?```/) || text.match(/```\s?([\s\S]*?)\s?```/);
     if (jsonMatch && jsonMatch[1]) {
       try {
@@ -63,8 +61,6 @@ function safeJsonParse(text: string) {
         throw new Error(`Failed to parse extracted JSON: ${innerE}`);
       }
     }
-    
-    // If no markdown blocks, try to find the first '{' and last '}'
     const firstBrace = text.indexOf('{');
     const lastBrace = text.lastIndexOf('}');
     if (firstBrace !== -1 && lastBrace !== -1) {
@@ -74,9 +70,36 @@ function safeJsonParse(text: string) {
         throw new Error(`Failed to parse braced JSON: ${innerE}`);
       }
     }
-    
     throw e;
   }
+}
+
+function validateAnnualPlan(data: any): AnnualPlanData {
+  if (!data || typeof data !== 'object') throw new Error('AI 응답이 올바른 형식이 아닙니다.');
+  if (!Array.isArray(data.currentLevel) || data.currentLevel.length === 0)
+    throw new Error('AI 응답에서 "currentLevel" 배열을 찾을 수 없습니다.');
+  if (!Array.isArray(data.longTermGoals) || data.longTermGoals.length === 0)
+    throw new Error('AI 응답에서 "longTermGoals" 배열을 찾을 수 없습니다.');
+  if (!Array.isArray(data.monthlyGoals) || data.monthlyGoals.length === 0)
+    throw new Error('AI 응답에서 "monthlyGoals" 배열을 찾을 수 없습니다.');
+  for (const g of data.monthlyGoals) {
+    if (typeof g.month !== 'number' || typeof g.goal !== 'string' || typeof g.content !== 'string')
+      throw new Error('월별 목표 데이터 형식이 올바르지 않습니다.');
+  }
+  return data as AnnualPlanData;
+}
+
+function validateMonthlyJournal(data: any): MonthlyJournalData {
+  if (!data || typeof data !== 'object') throw new Error('AI 응답이 올바른 형식이 아닙니다.');
+  if (typeof data.currentLevel !== 'string' || !data.currentLevel)
+    throw new Error('AI 응답에서 "currentLevel"을 찾을 수 없습니다.');
+  if (typeof data.monthlyGoal !== 'string')
+    throw new Error('AI 응답에서 "monthlyGoal"을 찾을 수 없습니다.');
+  if (!Array.isArray(data.sessions))
+    throw new Error('AI 응답에서 "sessions" 배열을 찾을 수 없습니다.');
+  if (typeof data.result !== 'string')
+    throw new Error('AI 응답에서 "result"를 찾을 수 없습니다.');
+  return data as MonthlyJournalData;
 }
 
 export async function generateAnnualPlan(student: Student): Promise<AnnualPlanData> {
@@ -122,7 +145,7 @@ export async function generateAnnualPlan(student: Student): Promise<AnnualPlanDa
     }), TIMEOUT_MS));
 
     if (!response.text) throw new Error('Empty response from AI');
-    return safeJsonParse(response.text);
+    return validateAnnualPlan(safeJsonParse(response.text));
   } catch (error) {
     if (apiKey) console.error("AI Error:", error);
     throw error;
@@ -187,7 +210,7 @@ export async function generateMonthlyJournal(student: Student, month: number, mo
     }), TIMEOUT_MS));
 
     if (!response.text) throw new Error('Empty response from AI');
-    return safeJsonParse(response.text);
+    return validateMonthlyJournal(safeJsonParse(response.text));
   } catch (error) {
     if (apiKey) console.error("AI Error:", error);
     throw error;

@@ -3,7 +3,7 @@
  * 좌측 학생 목록 사이드바: 검색, 리스트, 자동 등록 버튼, 초기화 버튼
  */
 import React from 'react';
-import { Search, Trash2, AlertTriangle } from 'lucide-react';
+import { Search, Trash2, AlertTriangle, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Student, StudentInfo } from '../../types';
 import { countInvalidDates } from '../../services/scheduleValidationService';
@@ -17,8 +17,9 @@ interface StudentSidebarProps {
   onStudentSelect: (name: string) => void;
   onAutoRegister: (name: string) => void;
   onResetAllData: () => void;
-  /** 학생별 결제 날짜 Map (이름 → 날짜 배열) */
   paymentDatesByStudent: Map<string, string[]>;
+  isOpen?: boolean;
+  onClose?: () => void;
 }
 
 export const StudentSidebar: React.FC<StudentSidebarProps> = ({
@@ -31,22 +32,42 @@ export const StudentSidebar: React.FC<StudentSidebarProps> = ({
   onAutoRegister,
   onResetAllData,
   paymentDatesByStudent,
+  isOpen,
+  onClose,
 }) => {
   return (
-    <aside className="w-80 border-r border-border-theme bg-white/40 backdrop-blur-xl flex flex-col no-print" aria-label="학생 목록">
-      <div className="p-6 border-b border-border-theme/50 bg-white/20">
-        <div className="relative group">
-          <label htmlFor="student-search" className="sr-only">학생 이름 검색</label>
-          <input
-            id="student-search"
-            type="text"
-            placeholder="학생 이름 검색..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            aria-describedby="student-count"
-            className="w-full pl-11 pr-4 py-3 bg-white border border-border-theme rounded-2xl focus:border-primary focus:ring-4 focus:ring-primary/5 outline-none transition-all text-sm font-bold shadow-sm group-hover:border-primary/30"
-          />
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted/60 group-focus-within:text-primary w-4 h-4 transition-colors" aria-hidden="true" />
+    <>
+      {/* 모바일 오버레이 */}
+      {isOpen && (
+        <div
+          className="fixed inset-0 bg-black/30 z-40 md:hidden"
+          onClick={onClose}
+        />
+      )}
+      <aside className={`w-80 border-r border-border-theme bg-white/40 backdrop-blur-xl flex flex-col no-print fixed md:relative inset-y-0 left-0 z-50 md:z-auto transition-transform duration-300 ${isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`} aria-label="학생 목록">
+        <div className="p-6 border-b border-border-theme/50 bg-white/20 flex items-center justify-between">
+          <div className="relative group flex-1">
+            <label htmlFor="student-search" className="sr-only">학생 이름 검색</label>
+            <input
+              id="student-search"
+              type="text"
+              placeholder="학생 이름 검색..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              aria-describedby="student-count"
+              className="w-full pl-11 pr-4 py-3 bg-white border border-border-theme rounded-2xl focus:border-primary focus:ring-4 focus:ring-primary/5 outline-none transition-all text-sm font-bold shadow-sm group-hover:border-primary/30"
+            />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted/60 group-focus-within:text-primary w-4 h-4 transition-colors" aria-hidden="true" />
+          </div>
+          {onClose && (
+            <button
+              onClick={onClose}
+              className="ml-2 p-2 hover:bg-slate-100 rounded-xl transition-colors md:hidden"
+              aria-label="사이드바 닫기"
+            >
+              <X className="w-5 h-5 text-text-muted" />
+            </button>
+          )}
         </div>
         <div id="student-count" className="mt-5 flex items-center justify-between text-[11px] font-black text-text-muted/60 uppercase tracking-[0.1em] px-1">
           <span>Student Directory</span>
@@ -54,7 +75,6 @@ export const StudentSidebar: React.FC<StudentSidebarProps> = ({
             {filteredStudents.length} Profiles
           </span>
         </div>
-      </div>
 
       <nav className="flex-1 overflow-auto p-3 space-y-1.5 custom-scrollbar" aria-label="학생 목록">
         <ul role="listbox" aria-label="학생 선택">
@@ -178,5 +198,6 @@ export const StudentSidebar: React.FC<StudentSidebarProps> = ({
         </button>
       </div>
     </aside>
+    </>
   );
 };

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Edit2, Save, X, FileDown, RefreshCw } from 'lucide-react';
 import { Student, MonthlyJournalData } from '../types';
+import { TemplateSettings, loadTemplateSettings } from '../services/templateService';
 import { downloadMonthlyJournalAsHWPX } from '../services/hwpxExportService';
 
 interface Props {
@@ -8,13 +9,15 @@ interface Props {
   data: MonthlyJournalData;
   month: number;
   year: number;
+  templateSettings?: TemplateSettings;
   onSave?: (newData: MonthlyJournalData) => void;
   onRegenerate?: () => void;
 }
 
-export const MonthlyJournal: React.FC<Props> = ({ student, data, month, year, onSave, onRegenerate }) => {
+export const MonthlyJournal: React.FC<Props> = ({ student, data, month, year, templateSettings: propSettings, onSave, onRegenerate }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editedData, setEditedData] = useState<MonthlyJournalData>(data);
+  const settings = propSettings || loadTemplateSettings();
 
   useEffect(() => {
     setEditedData(data);
@@ -95,8 +98,16 @@ export const MonthlyJournal: React.FC<Props> = ({ student, data, month, year, on
       {/* Header Section */}
       <div className="grid grid-cols-[1fr_auto] items-start mb-6 pt-4 gap-4">
         <div className="text-center pt-6 min-w-0">
-          <h2 className="text-2xl font-bold tracking-[1px] break-keep leading-tight">
-            {year}. 교육청 치료지원 대상 개별 치료 일지({month.toString().padStart(2, '0')}월)
+          {settings.showLogo && settings.logoUrl && (
+            <div className="mb-3">
+              <img src={settings.logoUrl} alt="기관 로고" className="h-12 mx-auto object-contain" />
+            </div>
+          )}
+          {settings.organizationName && (
+            <p className="text-sm font-bold mb-1" style={{ color: settings.headerColor }}>{settings.organizationName}</p>
+          )}
+          <h2 className="text-2xl font-bold tracking-[1px] break-keep leading-tight" style={{ color: settings.headerColor }}>
+            {settings.documentTitle || `${year}. 교육청 치료지원 대상 개별 치료 일지(${month.toString().padStart(2, '0')}월)`}
           </h2>
         </div>
         <div className="flex-none">
@@ -119,7 +130,7 @@ export const MonthlyJournal: React.FC<Props> = ({ student, data, month, year, on
       {/* Basic Info Table */}
       <table className="w-full border-collapse border border-black text-[0.8rem] mb-6">
         <thead>
-          <tr className="bg-slate-100">
+          <tr style={{ backgroundColor: settings.headerColor ? `${settings.headerColor}10` : undefined }}>
             <th className="border border-black p-2 w-[12%]">학생명</th>
             <th className="border border-black p-2 w-[15%]">생년월일</th>
             <th className="border border-black p-2 w-[18%]">소속학교<br/>(유치원)</th>
@@ -295,6 +306,16 @@ export const MonthlyJournal: React.FC<Props> = ({ student, data, month, year, on
           )}
         </div>
       </div>
+
+      {/* 기관 정보 푸터 */}
+      {(settings.organizationName || settings.footerText) && (
+        <div className="mt-8 pt-4 border-t border-black/20 text-center text-[0.7rem] text-slate-500">
+          {settings.organizationName && <p className="font-bold">{settings.organizationName}</p>}
+          {settings.organizationAddress && <p>{settings.organizationAddress}</p>}
+          {settings.organizationPhone && <p>Tel: {settings.organizationPhone}</p>}
+          {settings.footerText && <p className="mt-1 text-[0.65rem] text-slate-400">{settings.footerText}</p>}
+        </div>
+      )}
     </div>
   );
 };
