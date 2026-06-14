@@ -20,6 +20,7 @@ import { usePayments } from './hooks/usePayments';
 import { useFileUpload } from './hooks/useFileUpload';
 import { useDocumentGenerator } from './hooks/useDocumentGenerator';
 import { useToast } from './hooks/useToast';
+import { useConfirm } from './hooks/useConfirm';
 
 // 레이아웃 컴포넌트
 import { AppHeader } from './components/layout/AppHeader';
@@ -64,6 +65,7 @@ export default function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const { showToast } = useToast();
+  const { confirm, ConfirmDialog } = useConfirm();
 
   // ─── 커스텀 훅 ───
   const {
@@ -673,6 +675,7 @@ export default function App() {
       </Suspense>
 
       <AppFooter />
+      <ConfirmDialog />
     </div>
   );
 }
